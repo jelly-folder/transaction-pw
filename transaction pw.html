@@ -1,0 +1,1356 @@
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安全设置 · 交易密码 · Proto注</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f6f3;--surface:#ffffff;--surface2:#f0efe9;
+  --border:rgba(0,0,0,.08);--border-md:rgba(0,0,0,.14);
+  --text:#1a1916;--text-2:#6b6960;--text-3:#a8a79f;
+  --accent:#1a6b4a;--accent-light:#e8f4ef;--accent-text:#0f4a34;
+  --danger:#c0392b;--danger-light:#fdf0ee;
+  --info:#1a5fa8;--info-light:#eaf1fb;
+  --r:10px;--rs:6px;
+  --panel-w:272px;--panel-col:40px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'DM Sans','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;overflow:hidden}
+
+/* ===== 顶栏 ===== */
+.tb{height:52px;flex-shrink:0;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.tb-logo{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;flex-shrink:0}
+.tb-title-input{flex:1;min-width:0;border:1px solid transparent;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:var(--text);padding:6px 8px;border-radius:var(--rs);transition:border .15s,background .15s}
+.tb-title-input:hover{background:var(--surface2)}
+.tb-title-input:focus{outline:none;border-color:var(--border-md);background:var(--surface)}
+.mode-group{display:flex;background:var(--surface2);border-radius:var(--rs);padding:2px;flex-shrink:0}
+.mode-btn{border:none;background:none;font-family:inherit;font-size:12px;color:var(--text-2);padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .15s}
+.mode-btn.on{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.exp-btn{border:none;font-family:inherit;font-size:12px;font-weight:500;padding:7px 14px;border-radius:var(--rs);cursor:pointer;flex-shrink:0;background:var(--accent);color:#fff;transition:opacity .15s}
+.exp-btn:hover{opacity:.88}
+.share-badge{display:none;font-family:'DM Mono',monospace;font-size:11px;color:var(--info);background:var(--info-light);padding:5px 10px;border-radius:var(--rs);flex-shrink:0}
+
+/* ===== 工作区 ===== */
+.ws{flex:1;display:flex;min-height:0}
+.cv-wrap{flex:1;overflow:auto;padding:28px 28px 72px}
+.cv{width:780px;margin:0 auto;position:relative;transform-origin:top center}
+.cv-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-3);letter-spacing:.06em;margin-bottom:10px;text-transform:uppercase}
+
+/* ===== Mockup ===== */
+.mockup{background:var(--surface);border:1px solid var(--border-md);border-radius:var(--r);overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.mc{height:34px;background:var(--surface2);display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid var(--border)}
+.mc-dot{width:9px;height:9px;border-radius:50%;background:rgba(0,0,0,.12)}
+.mc-url{flex:1;margin-left:8px;background:var(--surface);border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);padding:4px 10px}
+.mb{position:relative;overflow:visible;padding:0}
+
+/* --- 页面还原 --- */
+.pg-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.pg-x{width:26px;height:26px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-2)}
+.pg-head h1{font-size:15px;font-weight:500;border-left:3px solid var(--border-md);padding-left:10px}
+.pg-body{display:flex}
+.side{width:150px;flex-shrink:0;border-right:1px solid var(--border);padding:14px 0}
+.side-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);padding:9px 16px;cursor:default}
+.side-item.on{color:var(--info);background:var(--info-light);border-right:2px solid var(--info)}
+.side-ic{width:14px;height:14px;border:1.4px solid currentColor;border-radius:4px;flex-shrink:0}
+.main{flex:1;min-width:0;padding:16px 18px 20px;background:#fafaf8}
+
+/* 演示控制条 */
+.demo-bar{display:flex;align-items:center;gap:10px;background:#fff8e6;border:1px solid rgba(138,92,0,.2);border-radius:var(--rs);font-size:11px;color:#8a5c00;padding:8px 12px;margin-bottom:12px}
+.demo-bar b{font-weight:500}
+.st-ok{color:var(--accent-text)}
+.st-no{color:var(--danger)}
+.db-sp{flex:1}
+.db-btn{border:1px solid rgba(138,92,0,.35);border-radius:99px;padding:3px 10px;cursor:pointer;user-select:none;background:var(--surface);color:#8a5c00;font-size:11px}
+.db-btn:hover{background:#fff3d6}
+
+.sec-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px}
+.sec-card h2{font-size:13px;font-weight:500;padding:12px 16px;border-bottom:1px solid var(--border)}
+.sec-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.sec-row:last-child{border-bottom:none}
+.sec-ic{width:40px;height:40px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sec-txt{flex:1;min-width:0}
+.sec-txt b{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;margin-bottom:3px}
+.sec-txt p{font-size:11px;color:var(--text-2);line-height:1.5}
+.badge-new{font-size:9px;font-weight:500;font-family:'DM Mono',monospace;color:var(--danger);background:var(--danger-light);padding:1px 6px;border-radius:99px;letter-spacing:.05em}
+.badge-status{font-size:10px;color:var(--text-3);background:var(--surface2);padding:2px 8px;border-radius:99px}
+.badge-status.ok{color:var(--accent-text);background:var(--accent-light)}
+.pill-btn{border:1px solid var(--border-md);background:var(--surface);color:var(--text);font-family:inherit;font-size:12px;padding:6px 18px;border-radius:99px;flex-shrink:0;cursor:default}
+.pill-btn.primary{border-color:var(--info);color:var(--info);cursor:pointer}
+.pill-btn.primary:hover{background:var(--info-light)}
+.row-hl{background:var(--info-light);outline:1.5px dashed var(--info);outline-offset:-1.5px;border-radius:0 0 var(--r) var(--r)}
+
+/* --- 付款验证弹窗（静态示意） --- */
+.modal-zone{position:relative;margin-top:6px;background:rgba(26,25,22,.045);border:1px dashed var(--border-md);border-radius:var(--r);padding:22px 0 26px}
+.modal-zone-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-bottom:14px}
+.pay-modal{width:400px;margin:0 auto;background:var(--surface);border:1px solid var(--border-md);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.10);overflow:hidden}
+.pm-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.pm-head b{font-size:13px;font-weight:500}
+.pm-head span{color:var(--text-3);font-size:13px}
+.pm-amt{text-align:center;padding:16px 0 6px}
+.pm-amt .num{font-family:'DM Mono',monospace;font-size:24px;font-weight:500}
+.pm-amt .lbl{font-size:11px;color:var(--text-3);margin-top:2px}
+.pm-tabs{display:flex;margin:14px 18px 0;background:var(--surface2);border-radius:var(--rs);padding:3px}
+.pm-tab{flex:1;text-align:center;font-size:12px;color:var(--text-2);padding:7px 0;border-radius:4px}
+.pm-tab.on{background:var(--surface);color:var(--info);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.pm-pin{display:flex;justify-content:center;gap:8px;padding:18px 0 6px}
+.pm-forgot{text-align:center;font-size:11px;color:var(--info);padding:4px 0 2px;text-decoration:underline;text-underline-offset:3px}
+.pm-cta{margin:14px 18px 18px;background:var(--info);color:#fff;text-align:center;font-size:13px;font-weight:500;padding:11px 0;border-radius:8px}
+
+/* --- 通用 pin 框 --- */
+.pin-box{width:38px;height:44px;border:1.4px solid var(--border-md);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-family:'DM Mono',monospace;background:var(--surface)}
+.pin-box.filled{border-color:var(--info);background:var(--info-light)}
+
+/* ===== 交互流程弹窗（overlay，真实可点） ===== */
+.ov{position:absolute;inset:0;background:rgba(26,25,22,.38);display:none;align-items:flex-start;justify-content:center;padding-top:52px;z-index:150}
+.ov.open{display:flex}
+.dlg{width:346px;background:var(--surface);border:1px solid var(--border-md);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18);overflow:hidden}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border)}
+.dlg-head b{font-size:13px;font-weight:500}
+.dlg-step{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);margin-left:8px}
+.dlg-x{color:var(--text-3);font-size:13px;cursor:pointer;padding:2px 4px}
+.dlg-x:hover{color:var(--text)}
+.dlg-body{padding:16px}
+.fl-desc{font-size:11.5px;color:var(--text-2);line-height:1.7;text-align:center;margin-bottom:12px}
+.fl-ic{width:46px;height:46px;border-radius:50%;background:var(--info-light);color:var(--info);font-size:20px;display:flex;align-items:center;justify-content:center;margin:2px auto 10px}
+.fl-ic.ok{background:var(--accent-light);color:var(--accent)}
+.fl-pin{display:flex;justify-content:center;gap:7px;margin:4px 0 8px}
+.fl-pin .pin-box{width:36px;height:42px;font-size:17px}
+.fl-pin.shake{animation:shk .3s}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+.fl-pin .pin-box.bad{border-color:var(--danger);background:var(--danger-light)}
+.fl-err{min-height:16px;font-size:11px;color:var(--danger);text-align:center;margin-bottom:4px}
+.fl-hint{min-height:16px;font-size:11px;color:var(--text-3);text-align:center;margin-bottom:4px}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 2px 4px}
+.np{height:38px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);font-family:'DM Mono',monospace;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
+.np:hover{background:var(--info-light);border-color:var(--info);color:var(--info)}
+.np.fn{font-size:12px;color:var(--text-2)}
+.fl-btns{display:flex;gap:10px;margin-top:12px}
+.fl-btn{flex:1;font-size:12.5px;padding:9px 0;border-radius:8px;border:1px solid var(--border-md);color:var(--text-2);text-align:center;cursor:pointer;user-select:none;background:var(--surface)}
+.fl-btn:hover{border-color:var(--text-3)}
+.fl-btn.pri{background:var(--info);border-color:var(--info);color:#fff;font-weight:500}
+.fl-btn.pri:hover{opacity:.9}
+.fl-btn.dis{opacity:.4;pointer-events:none}
+.qr{width:86px;height:86px;margin:0 auto 8px;border:5px solid #fff;outline:1px solid var(--border-md);background:
+  repeating-linear-gradient(0deg,#1a1916 0 5px,transparent 5px 10px),
+  repeating-linear-gradient(90deg,#1a1916 0 5px,#fff 5px 10px)}
+.qr-key{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);text-align:center;letter-spacing:.06em;margin-bottom:8px}
+
+/* ===== 角标 ===== */
+.hs{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--surface);border:2px solid var(--info);color:var(--info);font-size:11px;font-weight:500;font-family:'DM Mono',monospace;display:flex;align-items:center;justify-content:center;cursor:grab;z-index:100;box-shadow:0 0 0 4px rgba(26,95,168,.1);transition:box-shadow .15s,background .15s,color .15s}
+.hs.active{background:var(--info);color:#fff}
+.hs.dragging{opacity:.75;transform:scale(1.12);cursor:grabbing;transition:none}
+body.view-mode .hs{cursor:pointer}
+.hs-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:10px;font-family:'DM Sans',sans-serif;padding:3px 8px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s}
+.hs:hover .hs-tip{opacity:1}
+body.view-mode .hs-tip{display:none}
+
+/* ===== 右侧面板 ===== */
+.panel{width:var(--panel-w);overflow:hidden;transition:width .24s cubic-bezier(.4,0,.2,1);position:relative;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column}
+.panel.collapsed{width:var(--panel-col)}
+.ph{height:48px;display:flex;flex-direction:row-reverse;align-items:center;flex-shrink:0;border-bottom:1px solid var(--border)}
+.toggle-btn{width:var(--panel-col);height:48px;flex-shrink:0;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3)}
+.toggle-btn svg{width:14px;height:14px;transition:transform .24s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.panel.collapsed .toggle-btn svg{transform:rotate(180deg)}
+.ph-inner{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:0 4px 0 15px;overflow:hidden;opacity:1;transition:opacity .16s}
+.panel.collapsed .ph-inner{opacity:0;pointer-events:none}
+.ph-title{font-size:13px;font-weight:500;flex:1}
+.add-btn{border:1px solid var(--border-md);background:var(--surface);color:var(--text-2);font-family:inherit;font-size:11px;padding:4px 10px;border-radius:var(--rs);cursor:pointer}
+.add-btn:hover{border-color:var(--info);color:var(--info)}
+.panel-tab{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);white-space:nowrap;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);font-family:'DM Mono',monospace;pointer-events:none}
+.panel.collapsed .panel-tab{display:block}
+.panel.collapsed .plist{opacity:0;pointer-events:none}
+.plist{flex:1;overflow-y:auto;padding:10px;transition:opacity .16s}
+.ai{border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;margin-bottom:8px;cursor:pointer;transition:border .15s,background .15s}
+.ai:hover{border-color:var(--border-md)}
+.ai.active{border-color:var(--info);background:var(--info-light)}
+.ai-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.ai-num{width:20px;height:20px;border-radius:50%;border:1.6px solid var(--info);color:var(--info);font-family:'DM Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai.active .ai-num{background:var(--info);color:#fff}
+.ai-title{flex:1;font-size:12px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ai-tag{font-size:9px;font-family:'DM Mono',monospace;color:var(--accent-text);background:var(--accent-light);padding:2px 7px;border-radius:99px;flex-shrink:0}
+.ai-desc{font-size:11px;color:var(--text-2);line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.ai-pos{font-family:'DM Mono',monospace;font-size:9px;color:var(--text-3);margin-top:6px}
+.ai-edit-hint{font-size:9px;color:var(--text-3);margin-top:4px}
+.ai-input{width:100%;border:1px solid var(--border-md);border-radius:var(--rs);font-family:inherit;font-size:12px;padding:6px 8px;margin-bottom:6px;background:var(--surface)}
+.ai-input:focus{outline:none;border-color:var(--info)}
+.ai-textarea{width:100%;border:1px solid var(--border-md);border-radius:var(--rs);font-family:inherit;font-size:11px;line-height:1.6;padding:6px 8px;resize:vertical;min-height:90px;background:var(--surface)}
+.ai-textarea:focus{outline:none;border-color:var(--info)}
+.ai-actions{display:flex;gap:6px;margin-top:6px}
+.ai-btn{border:1px solid var(--border-md);background:var(--surface);font-family:inherit;font-size:11px;padding:4px 12px;border-radius:var(--rs);cursor:pointer;color:var(--text-2)}
+.ai-btn.pri{background:var(--info);border-color:var(--info);color:#fff}
+.ai-btn.del{color:var(--danger)}
+
+/* ===== 缩放条 ===== */
+.zoom-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border-md);border-radius:99px;padding:4px 6px;box-shadow:0 3px 14px rgba(0,0,0,.10);z-index:200}
+.zb-btn{width:26px;height:26px;border:none;background:none;border-radius:50%;cursor:pointer;color:var(--text-2);font-size:14px;display:flex;align-items:center;justify-content:center}
+.zb-btn:hover{background:var(--surface2)}
+.zb-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-2);min-width:44px;text-align:center}
+
+/* ===== toast ===== */
+.toast{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-8px);background:var(--text);color:#fff;font-size:12px;padding:8px 16px;border-radius:var(--rs);opacity:0;pointer-events:none;transition:all .2s;z-index:300}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== 模式 ===== */
+body.view-mode .ai-pos{display:none}
+body.view-mode .ai-edit-hint{display:none}
+body.view-mode .cv-label{display:none}
+body.view-locked .edit-only{display:none!important}
+body.view-locked .share-badge{display:block}
+body.view-locked .tb-title-input{cursor:default;pointer-events:none}
+body.view-locked .add-btn{display:none!important}
+body.view-locked .toggle-btn{display:none!important}
+</style>
+<style data-id="immersive-translate-input-injected-css">.immersive-translate-input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2147483647;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.immersive-translate-attach-loading::after {
+  content: " ";
+
+  --loading-color: #f78fb6;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: block;
+  margin: 12px auto;
+  position: relative;
+  color: white;
+  left: -100px;
+  box-sizing: border-box;
+  animation: immersiveTranslateShadowRolling 1.5s linear infinite;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-2000%, -50%);
+  z-index: 100;
+}
+
+.immersive-translate-loading-spinner {
+  vertical-align: middle !important;
+  width: 10px !important;
+  height: 10px !important;
+  display: inline-block !important;
+  margin: 0 4px !important;
+  border: 2px rgba(221, 244, 255, 0.6) solid !important;
+  border-top: 2px rgba(0, 0, 0, 0.375) solid !important;
+  border-left: 2px rgba(0, 0, 0, 0.375) solid !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  -webkit-animation: immersive-translate-loading-animation 0.6s infinite linear !important;
+  animation: immersive-translate-loading-animation 0.6s infinite linear !important;
+}
+
+@-webkit-keyframes immersive-translate-loading-animation {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+
+  to {
+    -webkit-transform: rotate(359deg);
+  }
+}
+
+@keyframes immersive-translate-loading-animation {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+.immersive-translate-input-loading {
+  --loading-color: #f78fb6;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: block;
+  margin: 12px auto;
+  position: relative;
+  color: white;
+  left: -100px;
+  box-sizing: border-box;
+  animation: immersiveTranslateShadowRolling 1.5s linear infinite;
+}
+
+@keyframes immersiveTranslateShadowRolling {
+  0% {
+    box-shadow: 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0),
+      0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  12% {
+    box-shadow: 100px 0 var(--loading-color), 0px 0 rgba(255, 255, 255, 0),
+      0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  25% {
+    box-shadow: 110px 0 var(--loading-color), 100px 0 var(--loading-color),
+      0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  36% {
+    box-shadow: 120px 0 var(--loading-color), 110px 0 var(--loading-color),
+      100px 0 var(--loading-color), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  50% {
+    box-shadow: 130px 0 var(--loading-color), 120px 0 var(--loading-color),
+      110px 0 var(--loading-color), 100px 0 var(--loading-color);
+  }
+
+  62% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 130px 0 var(--loading-color),
+      120px 0 var(--loading-color), 110px 0 var(--loading-color);
+  }
+
+  75% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0),
+      130px 0 var(--loading-color), 120px 0 var(--loading-color);
+  }
+
+  87% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0),
+      200px 0 rgba(255, 255, 255, 0), 130px 0 var(--loading-color);
+  }
+
+  100% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0),
+      200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.immersive-translate-toast {
+  display: flex;
+  position: fixed;
+  z-index: 2147483647;
+  left: 0;
+  right: 0;
+  top: 1%;
+  width: fit-content;
+  padding: 12px 20px;
+  margin: auto;
+  overflow: auto;
+  background: #fef6f9;
+  box-shadow: 0px 4px 10px 0px rgba(0, 10, 30, 0.06);
+  font-size: 15px;
+  border-radius: 8px;
+  color: #333;
+}
+
+.immersive-translate-toast-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.immersive-translate-toast-hidden {
+  margin: 0 20px 0 72px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.immersive-translate-toast-close {
+  color: #666666;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+  .immersive-translate-toast {
+    top: 0;
+    padding: 12px 0px 0 10px;
+  }
+  .immersive-translate-toast-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .immersive-translate-toast-hidden {
+    margin: 10px auto;
+  }
+}
+
+.immersive-translate-dialog {
+  position: fixed;
+  z-index: 2147483647;
+  left: 0;
+  top: 0;
+  display: flex;
+  width: 300px;
+  flex-direction: column;
+  align-items: center;
+  font-size: 15px;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  height: fit-content;
+  border-radius: 20px;
+  background-color: #fff;
+}
+
+.immersive-translate-modal {
+  display: none;
+  position: fixed;
+  z-index: 2147483647;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+  font-size: 15px;
+}
+
+.immersive-translate-modal-content {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 40px 24px 24px;
+  border-radius: 12px;
+  width: 350px;
+  font-family: system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu",
+    "Cantarell", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  position: relative;
+}
+
+@media screen and (max-width: 768px) {
+  .immersive-translate-modal-content {
+    margin: 25% auto !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .immersive-translate-modal-content {
+    width: 80vw !important;
+    margin: 20vh auto !important;
+    padding: 20px 12px 12px !important;
+  }
+
+  .immersive-translate-modal-title {
+    font-size: 14px !important;
+  }
+
+  .immersive-translate-modal-body {
+    font-size: 13px !important;
+    max-height: 60vh !important;
+  }
+
+  .immersive-translate-btn {
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+    margin: 0 4px !important;
+  }
+
+  .immersive-translate-modal-footer {
+    gap: 6px !important;
+    margin-top: 16px !important;
+  }
+}
+
+.immersive-translate-modal .immersive-translate-modal-content-in-input {
+  max-width: 500px;
+}
+.immersive-translate-modal-content-in-input .immersive-translate-modal-body {
+  text-align: left;
+  max-height: unset;
+}
+
+.immersive-translate-modal-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333333;
+}
+
+.immersive-translate-modal-body {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  color: #333333;
+  margin-top: 24px;
+  word-break: break-all;
+}
+
+@media screen and (max-width: 768px) {
+  .immersive-translate-modal-body {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+}
+
+.immersive-translate-close {
+  color: #666666;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.immersive-translate-close:hover,
+.immersive-translate-close:focus {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.immersive-translate-modal-footer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.immersive-translate-btn {
+  width: fit-content;
+  color: #fff;
+  background-color: #ea4c89;
+  border: none;
+  font-size: 14px;
+  margin: 0 8px;
+  padding: 9px 30px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.immersive-translate-btn-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.immersive-translate-btn:hover {
+  background-color: #f082ac;
+}
+.immersive-translate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.immersive-translate-btn:disabled:hover {
+  background-color: #ea4c89;
+}
+
+.immersive-translate-link-btn {
+  background-color: transparent;
+  color: #ea4c89;
+  border: none;
+  cursor: pointer;
+  height: 30px;
+  line-height: 30px;
+}
+
+.immersive-translate-cancel-btn {
+  /* gray color */
+  background-color: rgb(89, 107, 120);
+}
+
+.immersive-translate-cancel-btn:hover {
+  background-color: hsl(205, 20%, 32%);
+}
+
+.immersive-translate-action-btn {
+  background-color: transparent;
+  color: #ea4c89;
+  border: 1px solid #ea4c89;
+}
+
+.immersive-translate-btn svg {
+  margin-right: 5px;
+}
+
+.immersive-translate-link {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  text-decoration: none;
+  color: #ea4c89;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+.immersive-translate-primary-link {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  text-decoration: none;
+  color: #ea4c89;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+.immersive-translate-modal input[type="radio"] {
+  margin: 0 6px;
+  cursor: pointer;
+}
+
+.immersive-translate-modal label {
+  cursor: pointer;
+}
+
+.immersive-translate-close-action {
+  position: absolute;
+  top: 2px;
+  right: 0px;
+  cursor: pointer;
+}
+
+.imt-image-status {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 16px !important;
+}
+.imt-image-status img,
+.imt-image-status svg,
+.imt-img-loading {
+  width: 28px !important;
+  height: 28px !important;
+  margin: 0 0 8px 0 !important;
+  min-height: 28px !important;
+  min-width: 28px !important;
+  position: relative !important;
+}
+.imt-img-loading {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAtFBMVEUAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////oK74hAAAAPHRSTlMABBMIDyQXHwyBfFdDMSw+OjXCb+5RG51IvV/k0rOqlGRM6KKMhdvNyZBz9MaupmxpWyj437iYd/yJVNZeuUC7AAACt0lEQVRIx53T2XKiUBCA4QYOiyCbiAsuuGBcYtxiYtT3f6/pbqoYHVFO5r+iivpo6DpAWYpqeoFfr9f90DsYAuRSWkFnPO50OgR9PwiCUFcl2GEcx+N/YBh6pvKaefHlUgZd1zVe0NbYcQjGBfzrPE8Xz8aF+71D8gG6DHFPpc4a7xFiCDuhaWgKgGIJQ3d5IMGDrpS4S5KgpIm+en9f6PlAhKby4JwEIxlYJV9h5k5nee9GoxHJ2IDSNB0dwdad1NAxDJ/uXDHYmebdk4PdbkS58CIVHdYSUHTYYRWOJblWSyu2lmy3KNFVJNBhxcuGW4YBVCbYGRZwIooipHsNqjM4FbgOQqQqSKQQU9V8xmi1QlgHqQQ6DDBvRUVCDirs+EzGDGOQTCATgtYTnbCVLgsVgRE0T1QE0qHCFAht2z6dLvJQs3Lo2FQoDxWNUiBhaP4eRgwNkI+dAjVOA/kUrIDwf3CG8NfNOE0eiFotSuo+rBiq8tD9oY4Qzc6YJw99hl1wzpQvD7ef2M8QgnOGJfJw+EltQc+oX2yn907QB22WZcvlUpd143dqQu+8pCJZuGE4xCuPXJqqcs5sNpsI93Rmzym1k4Npk+oD1SH3/a3LOK/JpUBpWfqNySxWzCfNCUITuDG5dtuphrUJ1myeIE9bIsPiKrfqTai5WZxbhtNphYx6GEIHihyGFTI69lje/rxajdh0s0msZ0zYxyPLhYCb1CyHm9Qsd2H37Y3lugVwL9kNh8Ot8cha6fUNQ8nuXi5z9/ExsAO4zQrb/ev1yrCB7lGyQzgYDGuxq1toDN/JGvN+HyWNHKB7zEoK+PX11e12G431erGYzwmytAWU56fkMHY5JJnDRR2eZji3AwtIcrEV8Cojat/BdQ7XOwGV1e1hDjGGjXbdArm8uJZtCH5MbcctVX8A1WpqumJHwckAAAAASUVORK5CYII=");
+  background-size: 28px 28px;
+  animation: image-loading-rotate 1s linear infinite !important;
+}
+
+.imt-image-status span {
+  color: var(--bg-2, #fff) !important;
+  font-size: 14px !important;
+  line-height: 14px !important;
+  font-weight: 500 !important;
+  font-family: "PingFang SC", Arial, sans-serif !important;
+}
+
+.imt-primary-button {
+  display: flex;
+  padding: 12px 80px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  background: #ea4c89;
+  color: #fff;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 24px;
+  border: none;
+  cursor: pointer;
+}
+
+.imt-retry-text {
+  color: #999;
+  text-align: center;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 21px;
+  cursor: pointer;
+}
+
+.imt-action-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.imt-modal-content-text {
+  text-align: left;
+  color: #333;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+@keyframes image-loading-rotate {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.imt-linear-gradient-text {
+  background: linear-gradient(90deg, #00a6ff 0%, #c369ff 52.4%, #ff4590 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.imt-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imt-linear-black-btn {
+  border-radius: 50px;
+  background: linear-gradient(66deg, #222 19%, #696969 94.25%);
+  height: 48px;
+  width: 100%;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  justify-content: center;
+}
+</style></head>
+<body class="">
+
+<div class="tb">
+  <span class="tb-logo">Proto注</span>
+  <input class="tb-title-input" id="pageTitle" value="安全设置 · 交易密码功能（可交互）" title="点击编辑标题，回车确认">
+  <span class="share-badge">👁 预览模式</span>
+  <div class="mode-group edit-only">
+    <button class="mode-btn on" id="modeEdit" onclick="setMode('edit')">编辑</button>
+    <button class="mode-btn" id="modeView" onclick="setMode('view')">预览</button>
+  </div>
+  <button class="exp-btn edit-only" onclick="exportShare()">导出分享版</button>
+</div>
+
+<div class="ws">
+  <div class="cv-wrap">
+    <div class="cv" id="cv">
+      <div class="cv-label" id="cvLabel">编辑模式 · 拖动角标定位 · 点击角标编辑说明 · 原型内按钮可直接点击体验流程</div>
+      <div class="mockup">
+        <div class="mc">
+          <span class="mc-dot"></span><span class="mc-dot"></span><span class="mc-dot"></span>
+          <span class="mc-url">merchant.example.com/settings/security</span>
+        </div>
+        <div class="mb" id="mockupBody">
+
+          <div class="pg-head">
+            <div class="pg-x">✕</div>
+            <h1>用户设置</h1>
+          </div>
+
+          <div class="pg-body">
+            <div class="side">
+              <div class="side-item"><span class="side-ic"></span>个人信息</div>
+              <div class="side-item on"><span class="side-ic"></span>安全设置</div>
+              <div class="side-item"><span class="side-ic"></span>商户列表</div>
+              <div class="side-item"><span class="side-ic"></span>协议管理</div>
+              <div class="side-item"><span class="side-ic"></span>定制收银台</div>
+            </div>
+
+            <div class="main">
+              <div class="demo-bar">
+                <span>演示状态：Google <b id="stBound" class="st-no">未绑定</b> · 交易密码 <b id="stPwd" class="st-no">未设置</b></span>
+                <span class="db-sp"></span>
+                <span class="db-btn" onclick="toggleBound()">切换 Google 绑定</span>
+                <span class="db-btn" onclick="resetDemo()">重置演示</span>
+              </div>
+
+              <div class="sec-card">
+                <h2>安全设置</h2>
+                <div class="sec-row">
+                  <div class="sec-ic">🔑</div>
+                  <div class="sec-txt">
+                    <b>修改密码</b>
+                    <p>为了确保您的帐户安全，请您设定强密码</p>
+                  </div>
+                  <span class="pill-btn">修改</span>
+                </div>
+                <div class="sec-row">
+                  <div class="sec-ic">Ⓖ</div>
+                  <div class="sec-txt">
+                    <b>Google二次验证 <span class="badge-status" id="gRowStatus">未绑定</span></b>
+                    <p>用于登陆、提问、找回密码、修改安全设置、管理API等安全验证</p>
+                  </div>
+                  <span class="pill-btn">解绑</span>
+                </div>
+                <div class="sec-row row-hl">
+                  <div class="sec-ic">🔒</div>
+                  <div class="sec-txt">
+                    <b>交易密码 <span class="badge-new">NEW</span> <span class="badge-status" id="rowStatus">未设置</span></b>
+                    <p>用于付款时的快捷安全验证。设置后，付款时可选择输入交易密码或 Google 验证码完成验证</p>
+                  </div>
+                  <span class="pill-btn primary" id="rowBtn" onclick="clickSetup()">设置</span>
+                </div>
+              </div>
+
+              <div class="modal-zone">
+                <div class="modal-zone-label">付款场景 · 验证弹窗（静态示意）</div>
+                <div class="pay-modal">
+                  <div class="pm-head"><b>付款验证</b><span>✕</span></div>
+                  <div class="pm-amt">
+                    <div class="num">$ 1,280.00</div>
+                    <div class="lbl">订单号 PO-20260715-0093</div>
+                  </div>
+                  <div class="pm-tabs">
+                    <div class="pm-tab">Google 验证码</div>
+                    <div class="pm-tab on">交易密码</div>
+                  </div>
+                  <div class="pm-pin">
+                    <div class="pin-box filled">•</div>
+                    <div class="pin-box filled">•</div>
+                    <div class="pin-box filled">•</div>
+                    <div class="pin-box"></div>
+                    <div class="pin-box"></div>
+                    <div class="pin-box"></div>
+                  </div>
+                  <div class="pm-forgot">忘记交易密码？</div>
+                  <div class="pm-cta">确认付款</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 交互流程 overlay -->
+          <div class="ov" id="flowOv">
+            <div class="dlg">
+              <div class="dlg-head">
+                <span><b id="dlgTitle">设置交易密码</b><span class="dlg-step" id="dlgStep"></span></span>
+                <span class="dlg-x" onclick="closeFlow()">✕</span>
+              </div>
+              <div class="dlg-body" id="dlgBody"><div class="fl-ic">Ⓖ</div><div class="fl-desc">您尚未绑定 Google 二次验证。<br>设置交易密码属于安全设置变更，需要 Google 二次验证保护；忘记交易密码时也需通过 Google 验证找回。<br>绑定完成后将自动继续设置交易密码。</div><div class="fl-btns"><div class="fl-btn" onclick="closeFlow()">暂不设置</div><div class="fl-btn pri" onclick="goBind()">去绑定</div></div></div>
+            </div>
+          </div>
+
+        <div class="hs" id="hs-0" style="left: 399px; top: 244px;">1<div class="hs-tip">拖动移位</div></div><div class="hs active" id="hs-1" style="left: 383px; top: 313px;">2<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-2" style="left: 559px; top: 51px;">3<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-3" style="left: 590px; top: 52px;">4<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-4" style="left: 660px; top: 317px;">5<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-5" style="left: 295px; top: 555px;">6<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-6" style="left: 705px; top: 728px;">7<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-7" style="left: 501px; top: 688px;">8<div class="hs-tip">拖动移位</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="ph">
+      <button class="toggle-btn" onclick="togglePanel()">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5L4.5 7 9 11.5"></path></svg>
+      </button>
+      <div class="ph-inner">
+        <span class="ph-title">交互说明</span>
+        <button class="add-btn" onclick="addAnnot()">新增</button>
+      </div>
+    </div>
+    <div class="plist" id="plist"><div class="ai" onclick="onAiClick(0)"><div class="ai-top"><span class="ai-num">1</span><span class="ai-title">Google验证已绑定/未绑定</span><span class="ai-tag">标签</span></div><div class="ai-desc">首次设置交易密码前，需要绑定google二次验证码。
+
+1.未设置google二次验证：google二次验证新增「未绑定」标签，按钮「设置」；
+2.已设置google二次验证码：google二次验证标签变为「已绑定」，按钮变「解绑」。</div><div class="ai-pos">x:399 y:244</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai active" onclick="onAiClick(1)"><div class="ai-top"><span class="ai-num">2</span><span class="ai-title">交易密码已设置/未设置</span><span class="ai-tag">标签</span></div><div class="ai-desc">1.未设置交易密码：交易密码展示「未设置」标签，按钮「设置」；
+2.已设置交易密码：交易密码展示「已设置」标签，按钮「修改」；
+3.修改交易密码：支持通过google二次验证修改和注册邮箱修改。如通过注册邮箱修改，输入注册邮箱接收到的验证码，可进行下一步修改。</div><div class="ai-pos">x:383 y:313</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(2)"><div class="ai-top"><span class="ai-num">3</span><span class="ai-title">已绑定 Google</span><span class="ai-tag">场景</span></div><div class="ai-desc">点击「设置」：
+① 身份验证：输入 Google 二次验证码，点击下一步
+② 设置交易密码：输入 6 位纯数字，点击下一步
+③ 确认交易密码：再次输入第二步设置的交易密码，点击上一步或者下一步
+
+每步顶部展示步骤进度（1/3、2/3、3/3），右上角 ✕ 可随时退出，退出不保存任何中间状态。</div><div class="ai-pos">x:559 y:51</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(3)"><div class="ai-top"><span class="ai-num">4</span><span class="ai-title">未绑定 Google → 引导绑定</span><span class="ai-tag">场景</span></div><div class="ai-desc">未绑定用户点击「设置」→ 弹出引导弹窗，说明原因并给出「暂不设置 / 去绑定」。
+
+· 去绑定 → 进入绑定流程：Google Authenticator 扫码 + 输入 6 位验证码 → 绑定成功 toast
+· 绑定成功后自动进入交易密码设置步骤（绑定过程已完成身份验证，无需再验一次）
+· 暂不设置 / 中途关闭 → 返回页面，交易密码保持未设置
+</div><div class="ai-pos">x:590 y:52</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(4)"><div class="ai-top"><span class="ai-num">5</span><span class="ai-title">密码规则与错误处理</span><span class="ai-tag">规则</span></div><div class="ai-desc">1.6 位纯数字，每输入时校验；
+2.弱密码拦截（连续数字例如 123456 或 连续6位相同的数字例如111111）；
+3.6位相同 / 顺序连续 → 输入框震动变红、清空并提示「密码过于简单」；
+4.两次输入不一致 → 震动、清空第二次输入并提示「两次输入不一致，请重新输入」，停留在确认步骤。</div><div class="ai-pos">x:660 y:317</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(5)"><div class="ai-top"><span class="ai-num">6</span><span class="ai-title">付款验证方式切换</span><span class="ai-tag">点击触发</span></div><div class="ai-desc">付款验证弹窗双 Tab：Google 验证码/邮箱验证码」/「交易密码」。
+
+· 默认选中用户上次使用的方式（本地记忆）；
+· 未设置交易密码：该 Tab 置灰，点击提示并提供「去设置」链接；
+· 如果google验证解绑，则显示邮箱验证码。</div><div class="ai-pos">x:295 y:555</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(6)"><div class="ai-top"><span class="ai-num">7</span><span class="ai-title">交易密码输入（忽略）</span><span class="ai-tag">表单提交</span></div><div class="ai-desc">· 校验失败：震动、清空并提示「交易密码错误，还可尝试 N 次」
+· 连续错误 5 次：锁定交易密码验证 2 小时，自动切换到 Google 验证码 Tab 完成付款</div><div class="ai-pos">x:705 y:728</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(7)"><div class="ai-top"><span class="ai-num">8</span><span class="ai-title">忘记交易密码 / 确认付款</span><span class="ai-tag">规则</span></div><div class="ai-desc">和修改同操作流程
+
+忘记交易密码 → Google 验证或邮箱验证后设置新密码；重置后 24 小时内付款仅允许 Google 验证（防盗号即改即用）。
+
+确认交易/复核：验证通过前按钮置灰；成功 toast 并关闭弹窗刷新订单；失败保留弹窗展示原因。</div><div class="ai-pos">x:501 y:688</div><div class="ai-edit-hint">再次点击进入编辑</div></div><datalist id="tagList"><option value="点击触发"></option><option value="自动刷新"></option><option value="跳转导航"></option><option value="表格交互"></option><option value="表单提交"></option><option value="弹窗/抽屉"></option><option value="数据加载"></option><option value="状态变更"></option><option value="悬停效果"></option><option value="其他"></option></datalist></div>
+    <div class="panel-tab">交互说明</div>
+  </div>
+</div>
+
+<div class="zoom-bar">
+  <button class="zb-btn" onclick="zoom(-10)">−</button>
+  <span class="zb-val" id="zoomVal">100%</span>
+  <button class="zb-btn" onclick="zoom(10)">+</button>
+</div>
+
+<div class="toast" id="toast">已解绑 Google，交易密码同步停用</div>
+
+<div id="__shareSlot__" style="display:none" data-payload="{&quot;title&quot;:&quot;安全设置 · 交易密码功能（可交互）&quot;,&quot;annotations&quot;:[{&quot;x&quot;:399,&quot;y&quot;:244,&quot;title&quot;:&quot;Google验证已绑定/未绑定&quot;,&quot;tag&quot;:&quot;标签&quot;,&quot;desc&quot;:&quot;首次设置交易密码前，需要绑定google二次验证码。\n\n1.未设置google二次验证：google二次验证新增「未绑定」标签，按钮「设置」；\n2.已设置google二次验证码：google二次验证标签变为「已绑定」，按钮变「解绑」。&quot;},{&quot;x&quot;:383,&quot;y&quot;:313,&quot;title&quot;:&quot;交易密码已设置/未设置&quot;,&quot;tag&quot;:&quot;标签&quot;,&quot;desc&quot;:&quot;1.未设置交易密码：交易密码展示「未设置」标签，按钮「设置」；\n2.已设置交易密码：交易密码展示「已设置」标签，按钮「修改」；\n3.修改交易密码：支持通过google二次验证修改和注册邮箱修改。如通过注册邮箱修改，输入注册邮箱接收到的验证码，可进行下一步修改。&quot;},{&quot;x&quot;:559,&quot;y&quot;:51,&quot;title&quot;:&quot;已绑定 Google&quot;,&quot;tag&quot;:&quot;场景&quot;,&quot;desc&quot;:&quot;点击「设置」：\n① 身份验证：输入 Google 二次验证码，点击下一步\n② 设置交易密码：输入 6 位纯数字，点击下一步\n③ 确认交易密码：再次输入第二步设置的交易密码，点击上一步或者下一步\n\n每步顶部展示步骤进度（1/3、2/3、3/3），右上角 ✕ 可随时退出，退出不保存任何中间状态。&quot;},{&quot;x&quot;:590,&quot;y&quot;:52,&quot;title&quot;:&quot;未绑定 Google → 引导绑定&quot;,&quot;tag&quot;:&quot;场景&quot;,&quot;desc&quot;:&quot;未绑定用户点击「设置」→ 弹出引导弹窗，说明原因并给出「暂不设置 / 去绑定」。\n\n· 去绑定 → 进入绑定流程：Google Authenticator 扫码 + 输入 6 位验证码 → 绑定成功 toast\n· 绑定成功后自动进入交易密码设置步骤（绑定过程已完成身份验证，无需再验一次）\n· 暂不设置 / 中途关闭 → 返回页面，交易密码保持未设置\n&quot;},{&quot;x&quot;:660,&quot;y&quot;:317,&quot;title&quot;:&quot;密码规则与错误处理&quot;,&quot;tag&quot;:&quot;规则&quot;,&quot;desc&quot;:&quot;1.6 位纯数字，每输入时校验；\n2.弱密码拦截（连续数字例如 123456 或 连续6位相同的数字例如111111）；\n3.6位相同 / 顺序连续 → 输入框震动变红、清空并提示「密码过于简单」；\n4.两次输入不一致 → 震动、清空第二次输入并提示「两次输入不一致，请重新输入」，停留在确认步骤。&quot;},{&quot;x&quot;:295,&quot;y&quot;:555,&quot;title&quot;:&quot;付款验证方式切换&quot;,&quot;tag&quot;:&quot;点击触发&quot;,&quot;desc&quot;:&quot;付款验证弹窗双 Tab：Google 验证码/邮箱验证码」/「交易密码」。\n\n· 默认选中用户上次使用的方式（本地记忆）；\n· 未设置交易密码：该 Tab 置灰，点击提示并提供「去设置」链接；\n· 如果google验证解绑，则显示邮箱验证码。&quot;},{&quot;x&quot;:705,&quot;y&quot;:728,&quot;title&quot;:&quot;交易密码输入（忽略）&quot;,&quot;tag&quot;:&quot;表单提交&quot;,&quot;desc&quot;:&quot;· 校验失败：震动、清空并提示「交易密码错误，还可尝试 N 次」\n· 连续错误 5 次：锁定交易密码验证 2 小时，自动切换到 Google 验证码 Tab 完成付款&quot;},{&quot;x&quot;:501,&quot;y&quot;:688,&quot;title&quot;:&quot;忘记交易密码 / 确认付款&quot;,&quot;tag&quot;:&quot;规则&quot;,&quot;desc&quot;:&quot;和修改同操作流程\n\n忘记交易密码 → Google 验证或邮箱验证后设置新密码；重置后 24 小时内付款仅允许 Google 验证（防盗号即改即用）。\n\n确认交易/复核：验证通过前按钮置灰；成功 toast 并关闭弹窗刷新订单；失败保留弹窗展示原因。&quot;}]}"></div>
+
+<script>
+/* 1. 分享版检测 — 必须在所有 var 声明之前 */
+var __vl=false,__sd=null;
+(function(){
+  var el=document.getElementById('__shareSlot__');
+  if(!el)return;
+  var raw=el.getAttribute('data-payload');
+  if(!raw)return;
+  try{var d=JSON.parse(raw);__sd=d;__vl=true;}catch(e){}
+})();
+
+/* 2. 标注数据 */
+var annotData=(__sd&&__sd.annotations)||[
+  {x:700,y:410,title:"交易密码入口（可点击体验）",tag:"点击触发",
+   desc:"点击「设置」启动设置流程，整套弹窗可真实点击操作。\n\n· 未设置：徽标「未设置」，按钮「设置」\n· 设置成功后：徽标变「已设置」（绿色），按钮变「修改」，再次点击走相同流程（重新验证身份）"},
+  {x:640,y:112,title:"演示控制条（仅原型用）",tag:"其他",
+   desc:"用「切换 Google 绑定」在两个分支之间切换体验：\n\n· 已绑定 → 点「设置」直接进入身份验证\n· 未绑定 → 点「设置」先弹引导绑定\n\n附带规则演示：已设置交易密码时解绑 Google，交易密码同步停用（否则遗忘后无找回通道）。「重置演示」恢复初始状态。"},
+  {x:330,y:390,title:"分支A：已绑定 Google",tag:"表单提交",
+   desc:"点击「设置」→ 三步弹窗：\n\n① 身份验证：输入 Google 验证码（演示中任意 6 位数字即可）\n② 设置交易密码：输入 6 位纯数字\n③ 确认交易密码：再次输入\n\n每步顶部展示步骤进度（1/3、2/3、3/3），右上角 ✕ 可随时退出，退出不保存任何中间状态。"},
+  {x:470,y:428,title:"分支B：未绑定 Google → 引导绑定",tag:"弹窗/抽屉",
+   desc:"未绑定用户点击「设置」→ 弹出引导弹窗，说明原因并给出「暂不设置 / 去绑定」。\n\n· 去绑定 → 进入绑定流程：Google Authenticator 扫码 + 输入 6 位验证码 → 绑定成功 toast\n· 绑定成功后自动进入交易密码设置步骤（绑定过程已完成身份验证，无需再验一次）\n· 暂不设置 / 中途关闭 → 返回页面，交易密码保持未设置\n\n设计原因：交易密码属于安全设置，平台规则要求 Google 验证保护；且忘记交易密码的重置依赖 Google，无绑定则无找回通道。"},
+  {x:180,y:428,title:"密码规则与错误处理",tag:"状态变更",
+   desc:"6 位纯数字，输满自动校验（无确认按钮）。\n\n弱密码拦截（可在演示中体验，试试输入 123456 或 111111）：\n· 6 位相同 / 顺序连续 → 输入框震动变红、清空并提示「密码过于简单」\n\n两次输入不一致 → 震动、清空第二次输入并提示「两次输入不一致，请重新输入」，停留在确认步骤。"},
+  {x:436,y:660,title:"付款验证方式切换",tag:"点击触发",
+   desc:"（静态示意）付款验证弹窗双 Tab：「Google 验证码」/「交易密码」。\n\n· 默认选中用户上次使用的方式（本地记忆）\n· 未设置交易密码：该 Tab 置灰，点击提示并提供「去设置」链接\n· 因设置交易密码强制先绑 Google，能用交易密码的用户必然两种方式都可用，Google Tab 永远是兜底"},
+  {x:588,y:724,title:"付款时交易密码输入",tag:"表单提交",
+   desc:"6 位独立密码框，自动聚焦，输满自动提交校验。\n\n· 校验失败：震动、清空并提示「交易密码错误，还可尝试 N 次」\n· 连续错误 5 次：锁定交易密码验证 2 小时，自动切换到 Google 验证码 Tab 完成付款"},
+  {x:468,y:790,title:"忘记交易密码 / 确认付款",tag:"跳转导航",
+   desc:"忘记交易密码 → Google 验证身份后设置新密码（规则同首次）；重置后 24 小时内付款仅允许 Google 验证（防盗号即改即用）。\n\n确认付款：验证通过前按钮置灰；成功 toast 并关闭弹窗刷新订单；失败保留弹窗展示原因。"}
+];
+var TAGS=['点击触发','自动刷新','跳转导航','表格交互','表单提交','弹窗/抽屉','数据加载','状态变更','悬停效果','其他'];
+var activeIdx=0,editingIdx=-1,zoomLvl=100;
+var viewLocked=__vl;
+var currentMode=viewLocked?'view':'edit';
+
+/* 3. 分享版立即锁定 */
+if(viewLocked){document.body.classList.add('view-mode','view-locked');}
+
+/* ===== 工具 ===== */
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t.__tm);t.__tm=setTimeout(function(){t.classList.remove('show');},2200);
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ============================================================
+   交互流程状态机（设置交易密码演示）
+   screens: guide → bind → (gverify) → setpwd → confirm → done
+   ============================================================ */
+var F={bound:true,pwdSet:false,screen:null,pin:'',pwd1:'',err:'',justErr:false};
+
+function updateDemoUI(){
+  var sb=document.getElementById('stBound'),sp=document.getElementById('stPwd');
+  sb.textContent=F.bound?'已绑定':'未绑定';
+  sb.className=F.bound?'st-ok':'st-no';
+  sp.textContent=F.pwdSet?'已设置':'未设置';
+  sp.className=F.pwdSet?'st-ok':'st-no';
+  var rs=document.getElementById('rowStatus');
+  rs.textContent=F.pwdSet?'已设置':'未设置';
+  rs.className='badge-status'+(F.pwdSet?' ok':'');
+  document.getElementById('rowBtn').textContent=F.pwdSet?'修改':'设置';
+  var gs=document.getElementById('gRowStatus');
+  gs.textContent=F.bound?'已绑定':'未绑定';
+  gs.className='badge-status'+(F.bound?' ok':'');
+}
+
+function toggleBound(){
+  if(F.bound&&F.pwdSet){
+    F.bound=false;F.pwdSet=false;
+    toast('已解绑 Google，交易密码同步停用');
+  }else{
+    F.bound=!F.bound;
+    toast(F.bound?'已切换为：Google 已绑定':'已切换为：Google 未绑定');
+  }
+  updateDemoUI();
+}
+function resetDemo(){
+  F={bound:true,pwdSet:false,screen:null,pin:'',pwd1:'',err:'',justErr:false};
+  closeFlow();updateDemoUI();toast('演示已重置');
+}
+
+function clickSetup(){
+  F.pin='';F.pwd1='';F.err='';
+  F.screen=F.bound?'gverify':'guide';
+  openFlow();
+}
+function openFlow(){
+  document.getElementById('flowOv').classList.add('open');
+  renderFlow();
+}
+function closeFlow(){
+  document.getElementById('flowOv').classList.remove('open');
+  F.screen=null;F.pin='';F.pwd1='';F.err='';
+}
+
+function isWeak(p){
+  if(/^(\d)\1{5}$/.test(p))return true;
+  if('0123456789'.indexOf(p)>=0)return true;
+  if('9876543210'.indexOf(p)>=0)return true;
+  return false;
+}
+
+function pinHtml(showDigit){
+  var h='<div class="fl-pin'+(F.justErr?' shake':'')+'">';
+  for(var i=0;i<6;i++){
+    var ch=F.pin[i]||'';
+    var cls='pin-box'+(ch?' filled':'')+(F.justErr?' bad':'');
+    h+='<div class="'+cls+'">'+(ch?(showDigit?ch:'•'):'')+'</div>';
+  }
+  return h+'</div>';
+}
+function numpadHtml(){
+  var keys=['1','2','3','4','5','6','7','8','9','b','0','c'];
+  var h='<div class="numpad">';
+  keys.forEach(function(k){
+    var label=k==='b'?'⌫':(k==='c'?'清空':k);
+    h+='<div class="np'+((k==='b'||k==='c')?' fn':'')+'" onclick="npTap(\''+k+'\')">'+label+'</div>';
+  });
+  return h+'</div>';
+}
+
+function renderFlow(){
+  var t=document.getElementById('dlgTitle'),
+      st=document.getElementById('dlgStep'),
+      b=document.getElementById('dlgBody');
+  var s=F.screen;
+  if(s==='guide'){
+    t.textContent='设置交易密码';st.textContent='';
+    b.innerHTML='<div class="fl-ic">Ⓖ</div>'
+      +'<div class="fl-desc">您尚未绑定 Google 二次验证。<br>设置交易密码属于安全设置变更，需要 Google 二次验证保护；忘记交易密码时也需通过 Google 验证找回。<br>绑定完成后将自动继续设置交易密码。</div>'
+      +'<div class="fl-btns"><div class="fl-btn" onclick="closeFlow()">暂不设置</div>'
+      +'<div class="fl-btn pri" onclick="goBind()">去绑定</div></div>';
+  }else if(s==='bind'){
+    t.textContent='绑定 Google 二次验证';st.textContent='';
+    b.innerHTML='<div class="qr"></div>'
+      +'<div class="qr-key">密钥：K7KQ-3M2A-9ZXV-P4RT</div>'
+      +'<div class="fl-desc" style="margin-bottom:6px">使用 Google Authenticator 扫码添加，<br>然后输入 App 中显示的 6 位验证码</div>'
+      +pinHtml(true)
+      +'<div class="fl-err">'+esc(F.err)+'</div>'
+      +numpadHtml()
+      +'<div class="fl-btns"><div class="fl-btn pri'+(F.pin.length===6?'':' dis')+'" onclick="bindDone()">绑定并继续</div></div>';
+  }else if(s==='gverify'){
+    t.textContent='身份验证';st.textContent='步骤 1/3';
+    b.innerHTML='<div class="fl-ic">Ⓖ</div>'
+      +'<div class="fl-desc">为保护账户安全，请输入 Google Authenticator 中的 6 位验证码</div>'
+      +pinHtml(true)
+      +'<div class="fl-err">'+esc(F.err)+'</div>'
+      +numpadHtml()
+      +'<div class="fl-btns"><div class="fl-btn pri'+(F.pin.length===6?'':' dis')+'" onclick="gvNext()">下一步</div></div>';
+  }else if(s==='setpwd'){
+    t.textContent='设置交易密码';st.textContent='步骤 2/3';
+    b.innerHTML='<div class="fl-desc">请输入 6 位纯数字交易密码<br><span style="color:var(--text-3)">不可使用相同或连续数字（如 111111、123456）</span></div>'
+      +pinHtml(false)
+      +'<div class="fl-err">'+esc(F.err)+'</div>'
+      +numpadHtml()
+      +'<div class="fl-hint">输满 6 位自动进入下一步</div>';
+  }else if(s==='confirm'){
+    t.textContent='确认交易密码';st.textContent='步骤 3/3';
+    b.innerHTML='<div class="fl-desc">请再次输入交易密码以确认</div>'
+      +pinHtml(false)
+      +'<div class="fl-err">'+esc(F.err)+'</div>'
+      +numpadHtml()
+      +'<div class="fl-hint">输满 6 位自动完成校验</div>';
+  }else if(s==='done'){
+    t.textContent='设置成功';st.textContent='';
+    b.innerHTML='<div class="fl-ic ok">✓</div>'
+      +'<div class="fl-desc"><b style="color:var(--text)">交易密码设置成功</b><br>付款时可选择使用交易密码或 Google 验证码完成验证</div>'
+      +'<div class="fl-btns"><div class="fl-btn pri" onclick="finishFlow()">完成</div></div>';
+  }
+}
+
+function npTap(k){
+  F.err='';F.justErr=false;
+  if(k==='b')F.pin=F.pin.slice(0,-1);
+  else if(k==='c')F.pin='';
+  else if(F.pin.length<6)F.pin+=k;
+  renderFlow();
+  if(F.pin.length===6){
+    if(F.screen==='setpwd')setTimeout(checkSetPwd,220);
+    else if(F.screen==='confirm')setTimeout(checkConfirm,220);
+  }
+}
+function flowError(msg){
+  F.err=msg;F.pin='';F.justErr=true;
+  renderFlow();
+  setTimeout(function(){F.justErr=false;if(F.screen)renderFlow();},400);
+}
+function checkSetPwd(){
+  if(F.screen!=='setpwd'||F.pin.length!==6)return;
+  if(isWeak(F.pin)){flowError('密码过于简单，请勿使用相同或连续数字');return;}
+  F.pwd1=F.pin;F.pin='';F.err='';F.screen='confirm';renderFlow();
+}
+function checkConfirm(){
+  if(F.screen!=='confirm'||F.pin.length!==6)return;
+  if(F.pin!==F.pwd1){flowError('两次输入不一致，请重新输入');return;}
+  F.screen='done';F.pin='';renderFlow();
+}
+function goBind(){F.pin='';F.err='';F.screen='bind';renderFlow();}
+function bindDone(){
+  if(F.pin.length!==6)return;
+  F.bound=true;updateDemoUI();
+  toast('Google 绑定成功，继续设置交易密码');
+  F.pin='';F.err='';F.screen='setpwd';renderFlow();
+}
+function gvNext(){
+  if(F.pin.length!==6)return;
+  F.pin='';F.err='';F.screen='setpwd';renderFlow();
+}
+function finishFlow(){
+  F.pwdSet=true;closeFlow();updateDemoUI();
+  toast('交易密码已启用，付款时可用');
+}
+
+/* 物理键盘支持 */
+document.addEventListener('keydown',function(e){
+  if(!F.screen)return;
+  if(['bind','gverify','setpwd','confirm'].indexOf(F.screen)<0)return;
+  if(e.key>='0'&&e.key<='9'){npTap(e.key);e.preventDefault();}
+  else if(e.key==='Backspace'){npTap('b');e.preventDefault();}
+  else if(e.key==='Escape'){closeFlow();}
+  else if(e.key==='Enter'){
+    if(F.screen==='gverify')gvNext();
+    else if(F.screen==='bind')bindDone();
+  }
+});
+
+/* ===== 持久化（标注数据） ===== */
+function save(){
+  if(viewLocked)return;
+  try{
+    var ti=document.getElementById('pageTitle');
+    localStorage.setItem('proto-annot-v3-txnpwd-3',
+      JSON.stringify({title:ti?ti.value:'',annotations:annotData}));
+  }catch(e){}
+}
+function load(){
+  if(viewLocked)return;
+  try{
+    var s=localStorage.getItem('proto-annot-v3-txnpwd-3');if(!s)return;
+    var p=JSON.parse(s);
+    if(p&&p.annotations&&Array.isArray(p.annotations)&&p.annotations.length)annotData=p.annotations;
+    else if(Array.isArray(p)&&p.length)annotData=p;
+    if(p&&p.title){
+      var ti=document.getElementById('pageTitle');
+      if(ti)ti.value=p.title;
+      document.title=p.title+' · Proto注';
+    }
+  }catch(e){}
+}
+
+/* ===== 标注渲染 ===== */
+function render(){renderHotspots();renderPanel();}
+
+function renderHotspots(){
+  var mb=document.getElementById('mockupBody');
+  Array.prototype.forEach.call(mb.querySelectorAll('.hs'),function(h){h.remove();});
+  annotData.forEach(function(d,i){
+    var hs=document.createElement('div');
+    hs.className='hs'+(i===activeIdx?' active':'');
+    hs.id='hs-'+i;hs.textContent=i+1;
+    hs.style.left=d.x+'px';hs.style.top=d.y+'px';
+    var tip=document.createElement('div');tip.className='hs-tip';tip.textContent='拖动移位';
+    hs.appendChild(tip);
+    hs.addEventListener('mousedown',function(e){onHsDown(e,i);});
+    hs.addEventListener('click',function(e){e.stopPropagation();});
+    mb.appendChild(hs);
+  });
+}
+
+function renderPanel(){
+  var pl=document.getElementById('plist');
+  var html='';
+  annotData.forEach(function(d,i){
+    if(i===editingIdx&&!viewLocked){
+      html+='<div class="ai active">'
+        +'<div class="ai-top"><span class="ai-num">'+(i+1)+'</span>'
+        +'<input class="ai-input" id="editTitle" value="'+esc(d.title)+'" placeholder="标题"></div>'
+        +'<input class="ai-input" id="editTag" value="'+esc(d.tag||'')+'" placeholder="标签（如：点击触发）" list="tagList">'
+        +'<textarea class="ai-textarea" id="editDesc" placeholder="交互说明">'+esc(d.desc)+'</textarea>'
+        +'<div class="ai-actions">'
+        +'<button class="ai-btn pri" onclick="saveEdit('+i+')">保存</button>'
+        +'<button class="ai-btn" onclick="cancelEdit()">取消</button>'
+        +'<button class="ai-btn del" onclick="delAnnot('+i+')">删除</button>'
+        +'</div></div>';
+    }else{
+      html+='<div class="ai'+(i===activeIdx?' active':'')+'" onclick="onAiClick('+i+')">'
+        +'<div class="ai-top"><span class="ai-num">'+(i+1)+'</span>'
+        +'<span class="ai-title">'+esc(d.title)+'</span>'
+        +(d.tag?'<span class="ai-tag">'+esc(d.tag)+'</span>':'')
+        +'</div>'
+        +'<div class="ai-desc">'+esc(d.desc)+'</div>'
+        +'<div class="ai-pos">x:'+Math.round(d.x)+' y:'+Math.round(d.y)+'</div>'
+        +'<div class="ai-edit-hint">再次点击进入编辑</div>'
+        +'</div>';
+    }
+  });
+  html+='<datalist id="tagList">'+TAGS.map(function(t){return '<option value="'+t+'">';}).join('')+'</datalist>';
+  pl.innerHTML=html;
+}
+
+function onAiClick(i){
+  if(editingIdx!==-1)return;
+  if(currentMode==='view'||viewLocked){selectAnnot(i);return;}
+  if(i===activeIdx)startEdit(i);else selectAnnot(i);
+}
+function selectAnnot(i){
+  activeIdx=i;editingIdx=-1;render();
+  var hs=document.getElementById('hs-'+i);
+  if(hs)hs.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function startEdit(i){
+  if(viewLocked||currentMode==='view')return;
+  editingIdx=i;activeIdx=i;renderPanel();
+  var t=document.getElementById('editTitle');if(t)t.focus();
+}
+function saveEdit(i){
+  var t=document.getElementById('editTitle'),g=document.getElementById('editTag'),d=document.getElementById('editDesc');
+  annotData[i].title=t?t.value:annotData[i].title;
+  annotData[i].tag=g?g.value:annotData[i].tag;
+  annotData[i].desc=d?d.value:annotData[i].desc;
+  editingIdx=-1;save();render();toast('已保存');
+}
+function cancelEdit(){editingIdx=-1;render();}
+function delAnnot(i){
+  annotData.splice(i,1);
+  if(activeIdx>=annotData.length)activeIdx=annotData.length-1;
+  if(activeIdx<0)activeIdx=0;
+  editingIdx=-1;save();render();toast('已删除');
+}
+function addAnnot(){
+  annotData.push({x:60,y:60,title:'新标注 '+(annotData.length+1),tag:'其他',desc:'在此填写交互说明'});
+  activeIdx=annotData.length-1;editingIdx=activeIdx;
+  save();render();
+}
+
+/* ===== 拖拽 ===== */
+var drag={active:false,idx:-1,startX:0,startY:0,origX:0,origY:0,moved:false};
+
+function onHsDown(e,i){
+  if(currentMode==='view'){selectAnnot(i);return;}
+  e.preventDefault();e.stopPropagation();
+  drag={active:true,idx:i,moved:false,
+    startX:e.clientX,startY:e.clientY,
+    origX:annotData[i].x,origY:annotData[i].y};
+  var hs=document.getElementById('hs-'+i);if(hs)hs.classList.add('dragging');
+}
+
+document.addEventListener('mousemove',function(e){
+  if(!drag.active)return;
+  var dx=e.clientX-drag.startX,dy=e.clientY-drag.startY;
+  if(Math.abs(dx)>2||Math.abs(dy)>2)drag.moved=true;
+  var sc=zoomLvl/100,mb=document.getElementById('mockupBody');
+  var nx=Math.max(-8,Math.min(mb.offsetWidth-18,drag.origX+dx/sc));
+  var ny=Math.max(-8,Math.min(mb.offsetHeight-18,drag.origY+dy/sc));
+  annotData[drag.idx].x=nx;annotData[drag.idx].y=ny;
+  var hs=document.getElementById('hs-'+drag.idx);
+  if(hs){hs.style.left=nx+'px';hs.style.top=ny+'px';}
+  var pe=document.querySelector('#plist .ai:nth-child('+(drag.idx+1)+') .ai-pos');
+  if(pe)pe.textContent='x:'+Math.round(nx)+' y:'+Math.round(ny);
+});
+
+document.addEventListener('mouseup',function(){
+  if(!drag.active)return;
+  var i=drag.idx,moved=drag.moved;
+  var hs=document.getElementById('hs-'+i);if(hs)hs.classList.remove('dragging');
+  drag.active=false;
+  if(!moved){if(editingIdx===-1){if(i===activeIdx)startEdit(i);else selectAnnot(i);}}
+  else{save();toast('角标已移动');}
+});
+
+document.addEventListener('touchstart',function(e){
+  var t=e.target.closest('.hs');if(!t)return;
+  if(currentMode==='view')return;
+  var i=parseInt(t.id.replace('hs-',''));var pt=e.touches[0];
+  drag={active:true,idx:i,moved:false,startX:pt.clientX,startY:pt.clientY,
+    origX:annotData[i].x,origY:annotData[i].y};
+  t.classList.add('dragging');e.preventDefault();
+},{passive:false});
+
+document.addEventListener('touchmove',function(e){
+  if(!drag.active)return;
+  var pt=e.touches[0],dx=pt.clientX-drag.startX,dy=pt.clientY-drag.startY;
+  drag.moved=true;var sc=zoomLvl/100,mb=document.getElementById('mockupBody');
+  var nx=Math.max(-8,Math.min(mb.offsetWidth-18,drag.origX+dx/sc));
+  var ny=Math.max(-8,Math.min(mb.offsetHeight-18,drag.origY+dy/sc));
+  annotData[drag.idx].x=nx;annotData[drag.idx].y=ny;
+  var hs=document.getElementById('hs-'+drag.idx);
+  if(hs){hs.style.left=nx+'px';hs.style.top=ny+'px';}
+  e.preventDefault();
+},{passive:false});
+
+document.addEventListener('touchend',function(){
+  if(!drag.active)return;
+  var i=drag.idx,moved=drag.moved;
+  var hs=document.getElementById('hs-'+i);if(hs)hs.classList.remove('dragging');
+  drag.active=false;
+  if(!moved){if(editingIdx===-1){if(i===activeIdx)startEdit(i);else selectAnnot(i);}}
+  else{save();toast('角标已移动');}
+});
+
+/* ===== 模式 ===== */
+function setMode(m){
+  if(viewLocked)return;
+  currentMode=m;
+  document.body.classList.toggle('view-mode',m==='view');
+  document.getElementById('modeEdit').classList.toggle('on',m==='edit');
+  document.getElementById('modeView').classList.toggle('on',m==='view');
+  document.getElementById('cvLabel').textContent=
+    m==='edit'?'编辑模式 · 拖动角标定位 · 点击角标编辑说明 · 原型内按钮可直接点击体验流程':'预览模式 · 点击角标查看说明 · 原型内按钮可直接点击体验流程';
+  editingIdx=-1;render();
+}
+
+/* ===== 面板收起 ===== */
+function togglePanel(){document.getElementById('panel').classList.toggle('collapsed');}
+
+/* ===== 缩放 ===== */
+function zoom(d){
+  zoomLvl=Math.max(50,Math.min(200,zoomLvl+d));
+  document.getElementById('cv').style.transform='scale('+(zoomLvl/100)+')';
+  document.getElementById('zoomVal').textContent=zoomLvl+'%';
+}
+
+/* ===== 导出分享版 ===== */
+function exportShare(){
+  var ti=document.getElementById('pageTitle');
+  var titleVal=ti?ti.value:'prototype';
+  var payload=JSON.stringify({title:titleVal,annotations:annotData});
+  var slot=document.getElementById('__shareSlot__');
+  var origAttr=slot.getAttribute('data-payload');
+  slot.setAttribute('data-payload',payload);
+  var src=document.documentElement.outerHTML;
+  slot.setAttribute('data-payload',origAttr);
+  var b=new Blob([src],{type:'text/html;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download=titleVal+'-share.html';a.click();
+  toast('分享版已导出，打开即为只读预览');
+}
+
+/* ===== 标题事件 ===== */
+(function(){
+  var inp=document.getElementById('pageTitle');if(!inp)return;
+  inp.addEventListener('input',function(){document.title=this.value+' · Proto注';});
+  inp.addEventListener('blur',function(){save();});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')this.blur();});
+})();
+
+/* 4. 分享版初始化 UI */
+if(viewLocked&&__sd){
+  var _ti=document.getElementById('pageTitle');
+  if(_ti&&__sd.title){_ti.value=__sd.title;document.title=__sd.title+' · Proto注';}
+  document.getElementById('cvLabel').textContent='预览模式 · 点击角标查看说明 · 原型内按钮可直接点击体验流程';
+  document.getElementById('modeView').classList.add('on');
+  document.getElementById('modeEdit').classList.remove('on');
+}
+
+/* 5. 加载并渲染 */
+updateDemoUI();
+load();render();
+</script>
+
+
+</body><div id="immersive-translate-popup" style="all: initial"></div></html>
