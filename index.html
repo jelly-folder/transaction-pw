@@ -102,7 +102,7 @@ body{font-family:'DM Sans','PingFang SC','Microsoft YaHei',sans-serif;background
 .pin-box.filled{border-color:var(--info);background:var(--info-light)}
 
 /* ===== 交互流程弹窗（overlay，真实可点） ===== */
-.ov{position:absolute;inset:0;background:rgba(26,25,22,.38);display:none;align-items:flex-start;justify-content:center;padding-top:52px;z-index:150}
+.ov{position:absolute;inset:0;background:rgba(26,25,22,.38);display:none;align-items:flex-start;justify-content:center;padding-top:48px;z-index:150}
 .ov.open{display:flex}
 .dlg{width:346px;background:var(--surface);border:1px solid var(--border-md);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18);overflow:hidden}
 .dlg-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border)}
@@ -131,10 +131,22 @@ body{font-family:'DM Sans','PingFang SC','Microsoft YaHei',sans-serif;background
 .fl-btn.pri{background:var(--info);border-color:var(--info);color:#fff;font-weight:500}
 .fl-btn.pri:hover{opacity:.9}
 .fl-btn.dis{opacity:.4;pointer-events:none}
+.fl-back{font-size:11px;color:var(--info);text-align:center;margin-top:10px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.fl-resend{font-size:11px;color:var(--info);text-align:center;margin-top:2px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.fl-resend.dis{color:var(--text-3);cursor:default;text-decoration:none}
 .qr{width:86px;height:86px;margin:0 auto 8px;border:5px solid #fff;outline:1px solid var(--border-md);background:
   repeating-linear-gradient(0deg,#1a1916 0 5px,transparent 5px 10px),
   repeating-linear-gradient(90deg,#1a1916 0 5px,#fff 5px 10px)}
 .qr-key{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);text-align:center;letter-spacing:.06em;margin-bottom:8px}
+/* 方式选择卡片 */
+.opt{display:flex;align-items:center;gap:12px;border:1px solid var(--border-md);border-radius:10px;padding:12px 14px;cursor:pointer;margin-bottom:10px;transition:border .15s,background .15s}
+.opt:hover{border-color:var(--info);background:var(--info-light)}
+.opt.dis{opacity:.45;pointer-events:none}
+.opt-ic{width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.opt-tx{flex:1;min-width:0}
+.opt-tx b{display:block;font-size:12.5px;font-weight:500;margin-bottom:2px}
+.opt-tx span{font-size:10.5px;color:var(--text-3)}
+.opt-arrow{color:var(--text-3);font-size:13px}
 
 /* ===== 角标 ===== */
 .hs{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--surface);border:2px solid var(--info);color:var(--info);font-size:11px;font-weight:500;font-family:'DM Mono',monospace;display:flex;align-items:center;justify-content:center;cursor:grab;z-index:100;box-shadow:0 0 0 4px rgba(26,95,168,.1);transition:box-shadow .15s,background .15s,color .15s}
@@ -725,7 +737,7 @@ body.view-locked .toggle-btn{display:none!important}
 
 <div class="tb">
   <span class="tb-logo">Proto注</span>
-  <input class="tb-title-input" id="pageTitle" value="安全设置 · 交易密码功能（可交互）" title="点击编辑标题，回车确认">
+  <input class="tb-title-input" id="pageTitle" value="安全设置 · 交易密码功能（双通道验证·可交互）" title="点击编辑标题，回车确认">
   <span class="share-badge">👁 预览模式</span>
   <div class="mode-group edit-only">
     <button class="mode-btn" id="modeEdit" onclick="setMode('edit')">编辑</button>
@@ -761,7 +773,7 @@ body.view-locked .toggle-btn{display:none!important}
 
             <div class="main">
               <div class="demo-bar">
-                <span>演示状态：Google <b id="stBound" class="st-no">未绑定</b> · 交易密码 <b id="stPwd" class="st-no">未设置</b></span>
+                <span>演示状态：Google <b id="stBound" class="st-ok">已绑定</b> · 交易密码 <b id="stPwd" class="st-no">未设置</b></span>
                 <span class="db-sp"></span>
                 <span class="db-btn" onclick="toggleBound()">切换 Google 绑定</span>
                 <span class="db-btn" onclick="resetDemo()">重置演示</span>
@@ -780,7 +792,7 @@ body.view-locked .toggle-btn{display:none!important}
                 <div class="sec-row">
                   <div class="sec-ic">Ⓖ</div>
                   <div class="sec-txt">
-                    <b>Google二次验证 <span class="badge-status" id="gRowStatus">未绑定</span></b>
+                    <b>Google二次验证 <span class="badge-status ok" id="gRowStatus">已绑定</span></b>
                     <p>用于登陆、提问、找回密码、修改安全设置、管理API等安全验证</p>
                   </div>
                   <span class="pill-btn">解绑</span>
@@ -827,14 +839,14 @@ body.view-locked .toggle-btn{display:none!important}
           <div class="ov" id="flowOv">
             <div class="dlg">
               <div class="dlg-head">
-                <span><b id="dlgTitle">设置交易密码</b><span class="dlg-step" id="dlgStep"></span></span>
+                <span><b id="dlgTitle">设置交易密码</b><span class="dlg-step" id="dlgStep">步骤 1/4</span></span>
                 <span class="dlg-x" onclick="closeFlow()">✕</span>
               </div>
-              <div class="dlg-body" id="dlgBody"><div class="fl-ic">Ⓖ</div><div class="fl-desc">您尚未绑定 Google 二次验证。<br>设置交易密码属于安全设置变更，需要 Google 二次验证保护；忘记交易密码时也需通过 Google 验证找回。<br>绑定完成后将自动继续设置交易密码。</div><div class="fl-btns"><div class="fl-btn" onclick="closeFlow()">暂不设置</div><div class="fl-btn pri" onclick="goBind()">去绑定</div></div></div>
+              <div class="dlg-body" id="dlgBody"><div class="fl-desc">请选择身份验证方式，验证通过后设置交易密码</div><div class="opt" onclick="chooseGoogle()"><div class="opt-ic">Ⓖ</div><div class="opt-tx"><b>Google 二次验证</b><span>使用 Authenticator 动态码验证</span></div><div class="opt-arrow">›</div></div><div class="opt" onclick="chooseEmail()"><div class="opt-ic">✉</div><div class="opt-tx"><b>注册邮箱验证码</b><span>发送至 m***t@example.com</span></div><div class="opt-arrow">›</div></div></div>
             </div>
           </div>
 
-        <div class="hs" id="hs-0" style="left: 399px; top: 244px;">1<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-1" style="left: 383px; top: 313px;">2<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-2" style="left: 559px; top: 51px;">3<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-3" style="left: 590px; top: 52px;">4<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-4" style="left: 660px; top: 317px;">5<div class="hs-tip">拖动移位</div></div><div class="hs active" id="hs-5" style="left: 295px; top: 555px;">6<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-6" style="left: 705px; top: 728px;">7<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-7" style="left: 501px; top: 688px;">8<div class="hs-tip">拖动移位</div></div></div>
+        <div class="hs active" id="hs-0" style="left: 394px; top: 246px;">1<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-1" style="left: 380px; top: 316px;">2<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-2" style="left: 571px; top: 48px;">3<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-3" style="left: 604px; top: 48px;">4<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-4" style="left: 636px; top: 49px;">5<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-5" style="left: 670px; top: 49px;">6<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-6" style="left: 279px; top: 562px;">7<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-7" style="left: 693px; top: 571px;">8<div class="hs-tip">拖动移位</div></div><div class="hs" id="hs-8" style="left: 693px; top: 611px;">9<div class="hs-tip">拖动移位</div></div></div>
       </div>
     </div>
   </div>
@@ -849,35 +861,38 @@ body.view-locked .toggle-btn{display:none!important}
         <button class="add-btn" onclick="addAnnot()">新增</button>
       </div>
     </div>
-    <div class="plist" id="plist"><div class="ai" onclick="onAiClick(0)"><div class="ai-top"><span class="ai-num">1</span><span class="ai-title">Google验证已绑定/未绑定</span><span class="ai-tag">标签</span></div><div class="ai-desc">首次设置交易密码前，需要google二次验证码或者邮箱验证码。
+    <div class="plist" id="plist"><div class="ai active" onclick="onAiClick(0)"><div class="ai-top"><span class="ai-num">1</span><span class="ai-title">Google验证已绑定/未绑定</span><span class="ai-tag">标签</span></div><div class="ai-desc">首次设置交易密码前，需要google二次验证码或者邮箱验证码。
 
 1.未设置google二次验证：google二次验证新增「未绑定」标签，按钮「设置」；
-2.已设置google二次验证码：google二次验证标签变为「已绑定」，按钮变「解绑」。</div><div class="ai-pos">x:399 y:244</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(1)"><div class="ai-top"><span class="ai-num">2</span><span class="ai-title">交易密码已设置/未设置</span><span class="ai-tag">标签</span></div><div class="ai-desc">1.未设置交易密码：交易密码展示「未设置」标签，按钮「设置」；
-2.首次设置交易密码，如未绑定google二次验证，展示邮箱验证码，可切换选择google二次验证，弹出[未绑定google二次验证的提示]；
+2.已设置google二次验证码：google二次验证标签变为「已绑定」，按钮变「解绑」。</div><div class="ai-pos">x:394 y:246</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(1)"><div class="ai-top"><span class="ai-num">2</span><span class="ai-title">交易密码已设置/未设置</span><span class="ai-tag">标签</span></div><div class="ai-desc">1.未设置交易密码：交易密码展示「未设置」标签，按钮「设置」；
+2.首次设置交易密码，选择google二次验证或者邮箱验证。如选择google二次验证但未绑定，弹出[未绑定google二次验证的提示]；
 3.已设置交易密码：交易密码展示「已设置」标签，按钮「修改」；
-4.修改交易密码：支持通过google二次验证修改和注册邮箱修改。如通过注册邮箱修改，输入注册邮箱接收到的验证码，可进行下一步修改。</div><div class="ai-pos">x:383 y:313</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(2)"><div class="ai-top"><span class="ai-num">3</span><span class="ai-title">已绑定 Google</span><span class="ai-tag">场景</span></div><div class="ai-desc">点击「设置」：
-① 身份验证：输入 Google 二次验证码或邮箱验证码，点击下一步
-② 设置交易密码：输入 6 位纯数字，点击下一步
-③ 确认交易密码：再次输入第二步设置的交易密码，点击上一步或者下一步
+4.修改交易密码：支持通过google二次验证修改和注册邮箱修改。</div><div class="ai-pos">x:380 y:316</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(2)"><div class="ai-top"><span class="ai-num">3</span><span class="ai-title">选择验证方式</span><span class="ai-tag">场景</span></div><div class="ai-desc">「验证方式选择页」，两个通道并列：
 
-每步顶部展示步骤进度（1/3、2/3、3/3），右上角 ✕ 可随时退出，退出不保存任何中间状态。</div><div class="ai-pos">x:559 y:51</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(3)"><div class="ai-top"><span class="ai-num">4</span><span class="ai-title">未绑定 Google → 可引导绑定</span><span class="ai-tag">场景</span></div><div class="ai-desc">未绑定用户点击「设置」→ 切换到google二次验证码后，弹出引导弹窗，说明原因并给出「暂不设置 / 去绑定」。
+1.Google 二次验证：已绑定显示「使用 Authenticator 动态码验证」；未绑定显示「未绑定，将引导先绑定」
+2.注册邮箱验证码：显示脱敏邮箱 m***t@example.com
 
-· 去绑定 → 进入绑定流程：Google Authenticator 扫码 + 输入 6 位验证码 → 绑定成功 toast
-· 绑定成功后自动进入交易密码设置步骤（绑定过程已完成身份验证，无需再验一次）
-· 暂不设置 / 中途关闭 → 返回页面，交易密码保持未设置
-</div><div class="ai-pos">x:590 y:52</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(4)"><div class="ai-top"><span class="ai-num">5</span><span class="ai-title">密码规则与错误处理</span><span class="ai-tag">规则</span></div><div class="ai-desc">1.6 位纯数字，每输入时校验；
+各验证步骤均有「返回选择其他验证方式」入口，可随时切换通道。</div><div class="ai-pos">x:571 y:48</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(3)"><div class="ai-top"><span class="ai-num">4</span><span class="ai-title">通道一：Google 验证</span><span class="ai-tag">场景</span></div><div class="ai-desc">【已绑定】输入 Google 验证码→ 进入密码设置。
+
+【未绑定】弹引导绑定弹窗：
+1.去绑定 → 扫码 + 输入验证码 → 绑定成功 toast → 直接进入密码设置（绑定已完成身份验证）
+2.暂不绑定 / 绑定中途返回 → 回到方式选择页（不是关闭流程，因为还有邮箱通道可走）</div><div class="ai-pos">x:604 y:48</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(4)"><div class="ai-top"><span class="ai-num">5</span><span class="ai-title">通道二：注册邮箱验证码</span><span class="ai-tag">场景</span></div><div class="ai-desc">选择后系统自动向注册邮箱发送 6 位验证码，页面脱敏展示收件地址。
+
+1.「重新发送」60 秒倒计时，倒计时中置灰
+2.验证码错误或过期：提示重输（演模拟：输入 000000 模拟验证码错误）
+3.连续错误 5 次：邮箱通道锁定 30 分钟，自动返回方式选择页并置灰邮箱选项，引导改用 Google 验证
+4.验证通过 → 进入密码设置步骤</div><div class="ai-pos">x:636 y:49</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(5)"><div class="ai-top"><span class="ai-num">6</span><span class="ai-title">密码规则与错误处理</span><span class="ai-tag">规则</span></div><div class="ai-desc">1.6 位纯数字，每输入时校验；
 2.弱密码拦截（连续数字例如 123456 或 连续6位相同的数字例如111111）；
 3.6位相同 / 顺序连续 → 输入框震动变红、清空并提示「密码过于简单」；
-4.两次输入不一致 → 震动、清空第二次输入并提示「两次输入不一致，请重新输入」，停留在确认步骤。</div><div class="ai-pos">x:660 y:317</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai active" onclick="onAiClick(5)"><div class="ai-top"><span class="ai-num">6</span><span class="ai-title">交易验证方式切换</span><span class="ai-tag">点击触发</span></div><div class="ai-desc">付款验证弹窗双 Tab：Google 验证码/邮箱验证码」/「交易密码」。
+4.两次输入不一致 → 震动、清空第二次输入并提示「两次输入不一致，请重新输入」，停留在确认步骤。</div><div class="ai-pos">x:670 y:49</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(6)"><div class="ai-top"><span class="ai-num">7</span><span class="ai-title">交易验证方式切换</span><span class="ai-tag">触发</span></div><div class="ai-desc">付款验证弹窗双 Tab：「Google 验证码」/「交易密码」。
 
-· 默认选中用户上次使用的方式（本地记忆）；
-· 未设置交易密码：该 Tab 置灰，点击提示并提供「去设置」链接；
-· 如果google验证解绑，则显示邮箱验证码。</div><div class="ai-pos">x:295 y:555</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(6)"><div class="ai-top"><span class="ai-num">7</span><span class="ai-title">交易密码输入（忽略）</span><span class="ai-tag">表单提交</span></div><div class="ai-desc">· 校验失败：震动、清空并提示「交易密码错误，还可尝试 N 次」
-· 连续错误 5 次：锁定交易密码验证 2 小时，自动切换到 Google 验证码 Tab 完成付款</div><div class="ai-pos">x:705 y:728</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(7)"><div class="ai-top"><span class="ai-num">8</span><span class="ai-title">忘记交易密码 / 确认付款</span><span class="ai-tag">规则</span></div><div class="ai-desc">和修改同操作流程
+1.默认选中用户上次使用的方式（本地记忆）；
+2.未设置交易密码：该 Tab 置灰，点击提示并提供「去设置」链接；
+3.未绑定 Google（仅通过邮箱通道设置了交易密码的用户）：Google Tab 置灰，仅交易密码可用。</div><div class="ai-pos">x:279 y:562</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(7)"><div class="ai-top"><span class="ai-num">8</span><span class="ai-title">交易密码输入（先忽略）</span><span class="ai-tag">触发</span></div><div class="ai-desc">6 位独立密码框，自动聚焦，输满自动提交校验。
 
-忘记交易密码 → Google 验证或邮箱验证后设置新密码；重置后 24 小时内付款仅允许 Google 验证（防盗号即改即用）。
-
-确认交易/复核：验证通过前按钮置灰；成功 toast 并关闭弹窗刷新订单；失败保留弹窗展示原因。</div><div class="ai-pos">x:501 y:688</div><div class="ai-edit-hint">再次点击进入编辑</div></div><datalist id="tagList"><option value="点击触发"></option><option value="自动刷新"></option><option value="跳转导航"></option><option value="表格交互"></option><option value="表单提交"></option><option value="弹窗/抽屉"></option><option value="数据加载"></option><option value="状态变更"></option><option value="悬停效果"></option><option value="其他"></option></datalist></div>
+· 校验失败：震动、清空并提示「交易密码错误，还可尝试 N 次」
+· 连续错误 5 次：锁定交易密码验证 2 小时；已绑定 Google 自动切换到 Google Tab，未绑定则提示稍后重试或走忘记密码重置</div><div class="ai-pos">x:693 y:571</div><div class="ai-edit-hint">再次点击进入编辑</div></div><div class="ai" onclick="onAiClick(8)"><div class="ai-top"><span class="ai-num">9</span><span class="ai-title">忘记交易密码 / 确认付款</span><span class="ai-tag">触发</span></div><div class="ai-desc">1.忘记交易密码 → 与设置流程一致的双通道验证（Google 或注册邮箱验证码）→ 设置新密码；
+确2.认付款：验证通过前按钮置灰；成功 toast 并关闭弹窗刷新订单；失败保留弹窗展示原因。</div><div class="ai-pos">x:693 y:611</div><div class="ai-edit-hint">再次点击进入编辑</div></div><datalist id="tagList"><option value="点击触发"></option><option value="自动刷新"></option><option value="跳转导航"></option><option value="表格交互"></option><option value="表单提交"></option><option value="弹窗/抽屉"></option><option value="数据加载"></option><option value="状态变更"></option><option value="悬停效果"></option><option value="其他"></option></datalist></div>
     <div class="panel-tab">交互说明</div>
   </div>
 </div>
@@ -888,9 +903,9 @@ body.view-locked .toggle-btn{display:none!important}
   <button class="zb-btn" onclick="zoom(10)">+</button>
 </div>
 
-<div class="toast" id="toast">已保存</div>
+<div class="toast" id="toast">角标已移动</div>
 
-<div id="__shareSlot__" style="display:none" data-payload="{&quot;title&quot;:&quot;transaction pw&quot;,&quot;annotations&quot;:[{&quot;x&quot;:399,&quot;y&quot;:244,&quot;title&quot;:&quot;Google验证已绑定/未绑定&quot;,&quot;tag&quot;:&quot;标签&quot;,&quot;desc&quot;:&quot;首次设置交易密码前，需要google二次验证码或者邮箱验证码。\n\n1.未设置google二次验证：google二次验证新增「未绑定」标签，按钮「设置」；\n2.已设置google二次验证码：google二次验证标签变为「已绑定」，按钮变「解绑」。&quot;},{&quot;x&quot;:383,&quot;y&quot;:313,&quot;title&quot;:&quot;交易密码已设置/未设置&quot;,&quot;tag&quot;:&quot;标签&quot;,&quot;desc&quot;:&quot;1.未设置交易密码：交易密码展示「未设置」标签，按钮「设置」；\n2.首次设置交易密码，如未绑定google二次验证，展示邮箱验证码，可切换选择google二次验证，弹出[未绑定google二次验证的提示]；\n3.已设置交易密码：交易密码展示「已设置」标签，按钮「修改」；\n4.修改交易密码：支持通过google二次验证修改和注册邮箱修改。如通过注册邮箱修改，输入注册邮箱接收到的验证码，可进行下一步修改。&quot;},{&quot;x&quot;:559,&quot;y&quot;:51,&quot;title&quot;:&quot;已绑定 Google&quot;,&quot;tag&quot;:&quot;场景&quot;,&quot;desc&quot;:&quot;点击「设置」：\n① 身份验证：输入 Google 二次验证码或邮箱验证码，点击下一步\n② 设置交易密码：输入 6 位纯数字，点击下一步\n③ 确认交易密码：再次输入第二步设置的交易密码，点击上一步或者下一步\n\n每步顶部展示步骤进度（1/3、2/3、3/3），右上角 ✕ 可随时退出，退出不保存任何中间状态。&quot;},{&quot;x&quot;:590,&quot;y&quot;:52,&quot;title&quot;:&quot;未绑定 Google → 可引导绑定&quot;,&quot;tag&quot;:&quot;场景&quot;,&quot;desc&quot;:&quot;未绑定用户点击「设置」→ 切换到google二次验证码后，弹出引导弹窗，说明原因并给出「暂不设置 / 去绑定」。\n\n· 去绑定 → 进入绑定流程：Google Authenticator 扫码 + 输入 6 位验证码 → 绑定成功 toast\n· 绑定成功后自动进入交易密码设置步骤（绑定过程已完成身份验证，无需再验一次）\n· 暂不设置 / 中途关闭 → 返回页面，交易密码保持未设置\n&quot;},{&quot;x&quot;:660,&quot;y&quot;:317,&quot;title&quot;:&quot;密码规则与错误处理&quot;,&quot;tag&quot;:&quot;规则&quot;,&quot;desc&quot;:&quot;1.6 位纯数字，每输入时校验；\n2.弱密码拦截（连续数字例如 123456 或 连续6位相同的数字例如111111）；\n3.6位相同 / 顺序连续 → 输入框震动变红、清空并提示「密码过于简单」；\n4.两次输入不一致 → 震动、清空第二次输入并提示「两次输入不一致，请重新输入」，停留在确认步骤。&quot;},{&quot;x&quot;:295,&quot;y&quot;:555,&quot;title&quot;:&quot;交易验证方式切换&quot;,&quot;tag&quot;:&quot;点击触发&quot;,&quot;desc&quot;:&quot;付款验证弹窗双 Tab：Google 验证码/邮箱验证码」/「交易密码」。\n\n· 默认选中用户上次使用的方式（本地记忆）；\n· 未设置交易密码：该 Tab 置灰，点击提示并提供「去设置」链接；\n· 如果google验证解绑，则显示邮箱验证码。&quot;},{&quot;x&quot;:705,&quot;y&quot;:728,&quot;title&quot;:&quot;交易密码输入（忽略）&quot;,&quot;tag&quot;:&quot;表单提交&quot;,&quot;desc&quot;:&quot;· 校验失败：震动、清空并提示「交易密码错误，还可尝试 N 次」\n· 连续错误 5 次：锁定交易密码验证 2 小时，自动切换到 Google 验证码 Tab 完成付款&quot;},{&quot;x&quot;:501,&quot;y&quot;:688,&quot;title&quot;:&quot;忘记交易密码 / 确认付款&quot;,&quot;tag&quot;:&quot;规则&quot;,&quot;desc&quot;:&quot;和修改同操作流程\n\n忘记交易密码 → Google 验证或邮箱验证后设置新密码；重置后 24 小时内付款仅允许 Google 验证（防盗号即改即用）。\n\n确认交易/复核：验证通过前按钮置灰；成功 toast 并关闭弹窗刷新订单；失败保留弹窗展示原因。&quot;}]}"></div>
+<div id="__shareSlot__" style="display:none" data-payload="{&quot;title&quot;:&quot;transaction pw&quot;,&quot;annotations&quot;:[{&quot;x&quot;:394,&quot;y&quot;:246,&quot;title&quot;:&quot;Google验证已绑定/未绑定&quot;,&quot;tag&quot;:&quot;标签&quot;,&quot;desc&quot;:&quot;首次设置交易密码前，需要google二次验证码或者邮箱验证码。\n\n1.未设置google二次验证：google二次验证新增「未绑定」标签，按钮「设置」；\n2.已设置google二次验证码：google二次验证标签变为「已绑定」，按钮变「解绑」。&quot;},{&quot;x&quot;:380,&quot;y&quot;:316,&quot;title&quot;:&quot;交易密码已设置/未设置&quot;,&quot;tag&quot;:&quot;标签&quot;,&quot;desc&quot;:&quot;1.未设置交易密码：交易密码展示「未设置」标签，按钮「设置」；\n2.首次设置交易密码，选择google二次验证或者邮箱验证。如选择google二次验证但未绑定，弹出[未绑定google二次验证的提示]；\n3.已设置交易密码：交易密码展示「已设置」标签，按钮「修改」；\n4.修改交易密码：支持通过google二次验证修改和注册邮箱修改。&quot;},{&quot;x&quot;:571,&quot;y&quot;:48,&quot;title&quot;:&quot;选择验证方式&quot;,&quot;tag&quot;:&quot;场景&quot;,&quot;desc&quot;:&quot;「验证方式选择页」，两个通道并列：\n\n1.Google 二次验证：已绑定显示「使用 Authenticator 动态码验证」；未绑定显示「未绑定，将引导先绑定」\n2.注册邮箱验证码：显示脱敏邮箱 m***t@example.com\n\n各验证步骤均有「返回选择其他验证方式」入口，可随时切换通道。&quot;},{&quot;x&quot;:604,&quot;y&quot;:48,&quot;title&quot;:&quot;通道一：Google 验证&quot;,&quot;tag&quot;:&quot;场景&quot;,&quot;desc&quot;:&quot;【已绑定】输入 Google 验证码→ 进入密码设置。\n\n【未绑定】弹引导绑定弹窗：\n1.去绑定 → 扫码 + 输入验证码 → 绑定成功 toast → 直接进入密码设置（绑定已完成身份验证）\n2.暂不绑定 / 绑定中途返回 → 回到方式选择页（不是关闭流程，因为还有邮箱通道可走）&quot;},{&quot;x&quot;:636,&quot;y&quot;:49,&quot;title&quot;:&quot;通道二：注册邮箱验证码&quot;,&quot;tag&quot;:&quot;场景&quot;,&quot;desc&quot;:&quot;选择后系统自动向注册邮箱发送 6 位验证码，页面脱敏展示收件地址。\n\n1.「重新发送」60 秒倒计时，倒计时中置灰\n2.验证码错误或过期：提示重输（演模拟：输入 000000 模拟验证码错误）\n3.连续错误 5 次：邮箱通道锁定 30 分钟，自动返回方式选择页并置灰邮箱选项，引导改用 Google 验证\n4.验证通过 → 进入密码设置步骤&quot;},{&quot;x&quot;:670,&quot;y&quot;:49,&quot;title&quot;:&quot;密码规则与错误处理&quot;,&quot;tag&quot;:&quot;规则&quot;,&quot;desc&quot;:&quot;1.6 位纯数字，每输入时校验；\n2.弱密码拦截（连续数字例如 123456 或 连续6位相同的数字例如111111）；\n3.6位相同 / 顺序连续 → 输入框震动变红、清空并提示「密码过于简单」；\n4.两次输入不一致 → 震动、清空第二次输入并提示「两次输入不一致，请重新输入」，停留在确认步骤。&quot;},{&quot;x&quot;:279,&quot;y&quot;:562,&quot;title&quot;:&quot;交易验证方式切换&quot;,&quot;tag&quot;:&quot;触发&quot;,&quot;desc&quot;:&quot;付款验证弹窗双 Tab：「Google 验证码」/「交易密码」。\n\n1.默认选中用户上次使用的方式（本地记忆）；\n2.未设置交易密码：该 Tab 置灰，点击提示并提供「去设置」链接；\n3.未绑定 Google（仅通过邮箱通道设置了交易密码的用户）：Google Tab 置灰，仅交易密码可用。&quot;},{&quot;x&quot;:693,&quot;y&quot;:571,&quot;title&quot;:&quot;交易密码输入（先忽略）&quot;,&quot;tag&quot;:&quot;触发&quot;,&quot;desc&quot;:&quot;6 位独立密码框，自动聚焦，输满自动提交校验。\n\n· 校验失败：震动、清空并提示「交易密码错误，还可尝试 N 次」\n· 连续错误 5 次：锁定交易密码验证 2 小时；已绑定 Google 自动切换到 Google Tab，未绑定则提示稍后重试或走忘记密码重置&quot;},{&quot;x&quot;:693,&quot;y&quot;:611,&quot;title&quot;:&quot;忘记交易密码 / 确认付款&quot;,&quot;tag&quot;:&quot;触发&quot;,&quot;desc&quot;:&quot;1.忘记交易密码 → 与设置流程一致的双通道验证（Google 或注册邮箱验证码）→ 设置新密码；\n确2.认付款：验证通过前按钮置灰；成功 toast 并关闭弹窗刷新订单；失败保留弹窗展示原因。&quot;}]}"></div>
 
 <script>
 /* 1. 分享版检测 — 必须在所有 var 声明之前 */
@@ -908,19 +923,21 @@ var annotData=(__sd&&__sd.annotations)||[
   {x:700,y:410,title:"交易密码入口（可点击体验）",tag:"点击触发",
    desc:"点击「设置」启动设置流程，整套弹窗可真实点击操作。\n\n· 未设置：徽标「未设置」，按钮「设置」\n· 设置成功后：徽标变「已设置」（绿色），按钮变「修改」，再次点击走相同流程（重新验证身份）"},
   {x:640,y:112,title:"演示控制条（仅原型用）",tag:"其他",
-   desc:"用「切换 Google 绑定」在两个分支之间切换体验：\n\n· 已绑定 → 点「设置」直接进入身份验证\n· 未绑定 → 点「设置」先弹引导绑定\n\n附带规则演示：已设置交易密码时解绑 Google，交易密码同步停用（否则遗忘后无找回通道）。「重置演示」恢复初始状态。"},
-  {x:330,y:390,title:"分支A：已绑定 Google",tag:"表单提交",
-   desc:"点击「设置」→ 三步弹窗：\n\n① 身份验证：输入 Google 验证码（演示中任意 6 位数字即可）\n② 设置交易密码：输入 6 位纯数字\n③ 确认交易密码：再次输入\n\n每步顶部展示步骤进度（1/3、2/3、3/3），右上角 ✕ 可随时退出，退出不保存任何中间状态。"},
-  {x:470,y:428,title:"分支B：未绑定 Google → 引导绑定",tag:"弹窗/抽屉",
-   desc:"未绑定用户点击「设置」→ 弹出引导弹窗，说明原因并给出「暂不设置 / 去绑定」。\n\n· 去绑定 → 进入绑定流程：Google Authenticator 扫码 + 输入 6 位验证码 → 绑定成功 toast\n· 绑定成功后自动进入交易密码设置步骤（绑定过程已完成身份验证，无需再验一次）\n· 暂不设置 / 中途关闭 → 返回页面，交易密码保持未设置\n\n设计原因：交易密码属于安全设置，平台规则要求 Google 验证保护；且忘记交易密码的重置依赖 Google，无绑定则无找回通道。"},
-  {x:180,y:428,title:"密码规则与错误处理",tag:"状态变更",
-   desc:"6 位纯数字，输满自动校验（无确认按钮）。\n\n弱密码拦截（可在演示中体验，试试输入 123456 或 111111）：\n· 6 位相同 / 顺序连续 → 输入框震动变红、清空并提示「密码过于简单」\n\n两次输入不一致 → 震动、清空第二次输入并提示「两次输入不一致，请重新输入」，停留在确认步骤。"},
+   desc:"「切换 Google 绑定」影响 Google 通道的分支走向：\n\n· 已绑定 → 选 Google 后直接输验证码\n· 未绑定 → 选 Google 后先弹引导绑定\n\n附带规则演示：已设置交易密码时解绑 Google，若邮箱通道仍可用则交易密码保留（仍可通过邮箱找回）。「重置演示」恢复初始状态并解除邮箱通道锁定。"},
+  {x:200,y:388,title:"步骤①：选择验证方式（新增）",tag:"弹窗/抽屉",
+   desc:"设置流程入口改为「验证方式选择页」，两个通道并列：\n\n· Google 二次验证：已绑定显示「使用 Authenticator 动态码验证」；未绑定显示「未绑定，将引导先绑定」\n· 注册邮箱验证码：显示脱敏邮箱 m***t@example.com\n\n邮箱通道被锁定时（连错 5 次），该选项置灰并显示「已锁定，请 30 分钟后再试」。\n\n各验证步骤均有「返回选择其他验证方式」入口，可随时切换通道。"},
+  {x:330,y:430,title:"通道一：Google 验证",tag:"表单提交",
+   desc:"【已绑定】输入 Google 验证码（演示任意 6 位）→ 下一步进入密码设置。\n\n【未绑定】弹引导绑定弹窗：\n· 去绑定 → 扫码 + 输入验证码 → 绑定成功 toast → 直接进入密码设置（绑定已完成身份验证）\n· 暂不绑定 / 绑定中途返回 → 回到方式选择页（不是关闭流程，因为还有邮箱通道可走）"},
+  {x:460,y:388,title:"通道二：注册邮箱验证码（新增）",tag:"表单提交",
+   desc:"选择后系统自动向注册邮箱发送 6 位验证码，页面脱敏展示收件地址。\n\n· 「重新发送」60 秒倒计时，倒计时中置灰\n· 验证码错误或过期：震动、清空、提示重输（演示技巧：输入 000000 模拟验证码错误）\n· 连续错误 5 次：邮箱通道锁定 30 分钟，自动返回方式选择页并置灰邮箱选项，引导改用 Google 验证\n· 验证通过 → 进入密码设置步骤"},
+  {x:585,y:430,title:"密码规则与错误处理",tag:"状态变更",
+   desc:"步骤③④：6 位纯数字，输满自动校验（无确认按钮）。\n\n弱密码拦截（可体验，试试 123456 或 111111）：\n· 6 位相同 / 顺序连续 → 震动变红、清空并提示「密码过于简单」\n\n两次输入不一致 → 震动、清空第二次输入并提示，停留在确认步骤。\n\n任意步骤右上角 ✕ 退出，不保存中间状态。"},
   {x:436,y:660,title:"付款验证方式切换",tag:"点击触发",
-   desc:"（静态示意）付款验证弹窗双 Tab：「Google 验证码」/「交易密码」。\n\n· 默认选中用户上次使用的方式（本地记忆）\n· 未设置交易密码：该 Tab 置灰，点击提示并提供「去设置」链接\n· 因设置交易密码强制先绑 Google，能用交易密码的用户必然两种方式都可用，Google Tab 永远是兜底"},
+   desc:"（静态示意）付款验证弹窗双 Tab：「Google 验证码」/「交易密码」。\n\n· 默认选中用户上次使用的方式（本地记忆）\n· 未设置交易密码：该 Tab 置灰，点击提示并提供「去设置」链接\n· 未绑定 Google（仅通过邮箱通道设置了交易密码的用户）：Google Tab 置灰，仅交易密码可用"},
   {x:588,y:724,title:"付款时交易密码输入",tag:"表单提交",
-   desc:"6 位独立密码框，自动聚焦，输满自动提交校验。\n\n· 校验失败：震动、清空并提示「交易密码错误，还可尝试 N 次」\n· 连续错误 5 次：锁定交易密码验证 2 小时，自动切换到 Google 验证码 Tab 完成付款"},
+   desc:"6 位独立密码框，自动聚焦，输满自动提交校验。\n\n· 校验失败：震动、清空并提示「交易密码错误，还可尝试 N 次」\n· 连续错误 5 次：锁定交易密码验证 2 小时；已绑定 Google 自动切换到 Google Tab，未绑定则提示稍后重试或走忘记密码重置"},
   {x:468,y:790,title:"忘记交易密码 / 确认付款",tag:"跳转导航",
-   desc:"忘记交易密码 → Google 验证身份后设置新密码（规则同首次）；重置后 24 小时内付款仅允许 Google 验证（防盗号即改即用）。\n\n确认付款：验证通过前按钮置灰；成功 toast 并关闭弹窗刷新订单；失败保留弹窗展示原因。"}
+   desc:"忘记交易密码 → 与设置流程一致的双通道验证（Google 或注册邮箱验证码）→ 设置新密码；重置后 24 小时内付款仅允许 Google 验证（未绑定 Google 则限制小额），防盗号即改即用。\n\n确认付款：验证通过前按钮置灰；成功 toast 并关闭弹窗刷新订单；失败保留弹窗展示原因。"}
 ];
 var TAGS=['点击触发','自动刷新','跳转导航','表格交互','表单提交','弹窗/抽屉','数据加载','状态变更','悬停效果','其他'];
 var activeIdx=0,editingIdx=-1,zoomLvl=100;
@@ -940,9 +957,11 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 
 /* ============================================================
    交互流程状态机（设置交易密码演示）
-   screens: guide → bind → (gverify) → setpwd → confirm → done
+   choose → [gverify | guide → bind | everify] → setpwd → confirm → done
    ============================================================ */
-var F={bound:true,pwdSet:false,screen:null,pin:'',pwd1:'',err:'',justErr:false};
+var MASK_EMAIL='m***t@example.com';
+var F={bound:true,pwdSet:false,screen:null,pin:'',pwd1:'',err:'',justErr:false,
+       emailErr:0,emailLocked:false,resendLeft:0,cdTimer:null};
 
 function updateDemoUI(){
   var sb=document.getElementById('stBound'),sp=document.getElementById('stPwd');
@@ -960,23 +979,20 @@ function updateDemoUI(){
 }
 
 function toggleBound(){
-  if(F.bound&&F.pwdSet){
-    F.bound=false;F.pwdSet=false;
-    toast('已解绑 Google，交易密码同步停用');
-  }else{
-    F.bound=!F.bound;
-    toast(F.bound?'已切换为：Google 已绑定':'已切换为：Google 未绑定');
-  }
+  F.bound=!F.bound;
+  toast(F.bound?'已切换为：Google 已绑定':'已切换为：Google 未绑定');
   updateDemoUI();
 }
 function resetDemo(){
-  F={bound:true,pwdSet:false,screen:null,pin:'',pwd1:'',err:'',justErr:false};
+  stopCd();
+  F={bound:true,pwdSet:false,screen:null,pin:'',pwd1:'',err:'',justErr:false,
+     emailErr:0,emailLocked:false,resendLeft:0,cdTimer:null};
   closeFlow();updateDemoUI();toast('演示已重置');
 }
 
 function clickSetup(){
   F.pin='';F.pwd1='';F.err='';
-  F.screen=F.bound?'gverify':'guide';
+  F.screen='choose';
   openFlow();
 }
 function openFlow(){
@@ -984,8 +1000,13 @@ function openFlow(){
   renderFlow();
 }
 function closeFlow(){
+  stopCd();
   document.getElementById('flowOv').classList.remove('open');
   F.screen=null;F.pin='';F.pwd1='';F.err='';
+}
+function backToChoose(){
+  stopCd();
+  F.pin='';F.err='';F.screen='choose';renderFlow();
 }
 
 function isWeak(p){
@@ -1014,16 +1035,51 @@ function numpadHtml(){
   return h+'</div>';
 }
 
+/* 邮箱验证码倒计时 */
+function startCd(){
+  stopCd();
+  F.resendLeft=60;
+  F.cdTimer=setInterval(function(){
+    F.resendLeft--;
+    var el=document.getElementById('resendBtn');
+    if(el){
+      if(F.resendLeft>0){el.textContent='重新发送（'+F.resendLeft+'s）';el.className='fl-resend dis';}
+      else{el.textContent='重新发送';el.className='fl-resend';}
+    }
+    if(F.resendLeft<=0)stopCd();
+  },1000);
+}
+function stopCd(){
+  if(F.cdTimer){clearInterval(F.cdTimer);F.cdTimer=null;}
+}
+function sendEmailCode(){
+  toast('验证码已发送至 '+MASK_EMAIL);
+  startCd();
+}
+function resendCode(){
+  if(F.resendLeft>0)return;
+  F.pin='';F.err='';
+  renderFlow();
+  sendEmailCode();
+}
+
 function renderFlow(){
   var t=document.getElementById('dlgTitle'),
       st=document.getElementById('dlgStep'),
       b=document.getElementById('dlgBody');
   var s=F.screen;
-  if(s==='guide'){
+  if(s==='choose'){
+    t.textContent='设置交易密码';st.textContent='步骤 1/4';
+    var gSub=F.bound?'使用 Authenticator 动态码验证':'未绑定，将引导先绑定';
+    var eSub=F.emailLocked?'已锁定，请 30 分钟后再试':'发送至 '+MASK_EMAIL;
+    b.innerHTML='<div class="fl-desc">请选择身份验证方式，验证通过后设置交易密码</div>'
+      +'<div class="opt" onclick="chooseGoogle()"><div class="opt-ic">Ⓖ</div><div class="opt-tx"><b>Google 二次验证</b><span>'+gSub+'</span></div><div class="opt-arrow">›</div></div>'
+      +'<div class="opt'+(F.emailLocked?' dis':'')+'" onclick="chooseEmail()"><div class="opt-ic">✉</div><div class="opt-tx"><b>注册邮箱验证码</b><span>'+eSub+'</span></div><div class="opt-arrow">›</div></div>';
+  }else if(s==='guide'){
     t.textContent='设置交易密码';st.textContent='';
     b.innerHTML='<div class="fl-ic">Ⓖ</div>'
-      +'<div class="fl-desc">您尚未绑定 Google 二次验证。<br>设置交易密码属于安全设置变更，需要 Google 二次验证保护；忘记交易密码时也需通过 Google 验证找回。<br>绑定完成后将自动继续设置交易密码。</div>'
-      +'<div class="fl-btns"><div class="fl-btn" onclick="closeFlow()">暂不设置</div>'
+      +'<div class="fl-desc">您尚未绑定 Google 二次验证。<br>绑定完成后将自动继续设置交易密码；<br>您也可以返回选择邮箱验证码方式。</div>'
+      +'<div class="fl-btns"><div class="fl-btn" onclick="backToChoose()">返回</div>'
       +'<div class="fl-btn pri" onclick="goBind()">去绑定</div></div>';
   }else if(s==='bind'){
     t.textContent='绑定 Google 二次验证';st.textContent='';
@@ -1033,24 +1089,38 @@ function renderFlow(){
       +pinHtml(true)
       +'<div class="fl-err">'+esc(F.err)+'</div>'
       +numpadHtml()
-      +'<div class="fl-btns"><div class="fl-btn pri'+(F.pin.length===6?'':' dis')+'" onclick="bindDone()">绑定并继续</div></div>';
+      +'<div class="fl-btns"><div class="fl-btn pri'+(F.pin.length===6?'':' dis')+'" onclick="bindDone()">绑定并继续</div></div>'
+      +'<div class="fl-back" onclick="backToChoose()">返回选择其他验证方式</div>';
   }else if(s==='gverify'){
-    t.textContent='身份验证';st.textContent='步骤 1/3';
+    t.textContent='身份验证 · Google';st.textContent='步骤 2/4';
     b.innerHTML='<div class="fl-ic">Ⓖ</div>'
-      +'<div class="fl-desc">为保护账户安全，请输入 Google Authenticator 中的 6 位验证码</div>'
+      +'<div class="fl-desc">请输入 Google Authenticator 中的 6 位验证码</div>'
       +pinHtml(true)
       +'<div class="fl-err">'+esc(F.err)+'</div>'
       +numpadHtml()
-      +'<div class="fl-btns"><div class="fl-btn pri'+(F.pin.length===6?'':' dis')+'" onclick="gvNext()">下一步</div></div>';
+      +'<div class="fl-btns"><div class="fl-btn pri'+(F.pin.length===6?'':' dis')+'" onclick="gvNext()">下一步</div></div>'
+      +'<div class="fl-back" onclick="backToChoose()">返回选择其他验证方式</div>';
+  }else if(s==='everify'){
+    t.textContent='身份验证 · 邮箱';st.textContent='步骤 2/4';
+    var rs=F.resendLeft>0?'<span class="fl-resend dis" id="resendBtn">重新发送（'+F.resendLeft+'s）</span>':'<span class="fl-resend" id="resendBtn" onclick="resendCode()">重新发送</span>';
+    b.innerHTML='<div class="fl-ic">✉</div>'
+      +'<div class="fl-desc">验证码已发送至注册邮箱<br><b style="color:var(--text)">'+MASK_EMAIL+'</b>，请输入 6 位验证码</div>'
+      +pinHtml(true)
+      +'<div class="fl-err">'+esc(F.err)+'</div>'
+      +'<div style="text-align:center">'+rs+'</div>'
+      +numpadHtml()
+      +'<div class="fl-btns"><div class="fl-btn pri'+(F.pin.length===6?'':' dis')+'" onclick="evNext()">下一步</div></div>'
+      +'<div class="fl-back" onclick="backToChoose()">返回选择其他验证方式</div>'
+      +'<div class="fl-hint" style="margin-top:6px">演示：输入 000000 可模拟验证码错误</div>';
   }else if(s==='setpwd'){
-    t.textContent='设置交易密码';st.textContent='步骤 2/3';
+    t.textContent='设置交易密码';st.textContent='步骤 3/4';
     b.innerHTML='<div class="fl-desc">请输入 6 位纯数字交易密码<br><span style="color:var(--text-3)">不可使用相同或连续数字（如 111111、123456）</span></div>'
       +pinHtml(false)
       +'<div class="fl-err">'+esc(F.err)+'</div>'
       +numpadHtml()
       +'<div class="fl-hint">输满 6 位自动进入下一步</div>';
   }else if(s==='confirm'){
-    t.textContent='确认交易密码';st.textContent='步骤 3/3';
+    t.textContent='确认交易密码';st.textContent='步骤 4/4';
     b.innerHTML='<div class="fl-desc">请再次输入交易密码以确认</div>'
       +pinHtml(false)
       +'<div class="fl-err">'+esc(F.err)+'</div>'
@@ -1062,6 +1132,19 @@ function renderFlow(){
       +'<div class="fl-desc"><b style="color:var(--text)">交易密码设置成功</b><br>付款时可选择使用交易密码或 Google 验证码完成验证</div>'
       +'<div class="fl-btns"><div class="fl-btn pri" onclick="finishFlow()">完成</div></div>';
   }
+}
+
+/* 方式选择 */
+function chooseGoogle(){
+  F.pin='';F.err='';
+  F.screen=F.bound?'gverify':'guide';
+  renderFlow();
+}
+function chooseEmail(){
+  if(F.emailLocked)return;
+  F.pin='';F.err='';F.screen='everify';
+  renderFlow();
+  sendEmailCode();
 }
 
 function npTap(k){
@@ -1088,7 +1171,7 @@ function checkSetPwd(){
 function checkConfirm(){
   if(F.screen!=='confirm'||F.pin.length!==6)return;
   if(F.pin!==F.pwd1){flowError('两次输入不一致，请重新输入');return;}
-  F.screen='done';F.pin='';renderFlow();
+  stopCd();F.screen='done';F.pin='';renderFlow();
 }
 function goBind(){F.pin='';F.err='';F.screen='bind';renderFlow();}
 function bindDone(){
@@ -1101,6 +1184,22 @@ function gvNext(){
   if(F.pin.length!==6)return;
   F.pin='';F.err='';F.screen='setpwd';renderFlow();
 }
+function evNext(){
+  if(F.pin.length!==6)return;
+  if(F.pin==='000000'){
+    F.emailErr++;
+    if(F.emailErr>=5){
+      F.emailLocked=true;
+      toast('验证码连续错误 5 次，邮箱通道已锁定 30 分钟');
+      backToChoose();
+      return;
+    }
+    flowError('验证码错误或已过期，还可尝试 '+(5-F.emailErr)+' 次');
+    return;
+  }
+  stopCd();
+  F.pin='';F.err='';F.screen='setpwd';renderFlow();
+}
 function finishFlow(){
   F.pwdSet=true;closeFlow();updateDemoUI();
   toast('交易密码已启用，付款时可用');
@@ -1109,12 +1208,16 @@ function finishFlow(){
 /* 物理键盘支持 */
 document.addEventListener('keydown',function(e){
   if(!F.screen)return;
-  if(['bind','gverify','setpwd','confirm'].indexOf(F.screen)<0)return;
+  if(['bind','gverify','everify','setpwd','confirm'].indexOf(F.screen)<0){
+    if(e.key==='Escape')closeFlow();
+    return;
+  }
   if(e.key>='0'&&e.key<='9'){npTap(e.key);e.preventDefault();}
   else if(e.key==='Backspace'){npTap('b');e.preventDefault();}
   else if(e.key==='Escape'){closeFlow();}
   else if(e.key==='Enter'){
     if(F.screen==='gverify')gvNext();
+    else if(F.screen==='everify')evNext();
     else if(F.screen==='bind')bindDone();
   }
 });
@@ -1124,14 +1227,14 @@ function save(){
   if(viewLocked)return;
   try{
     var ti=document.getElementById('pageTitle');
-    localStorage.setItem('proto-annot-v3-txnpwd-3',
+    localStorage.setItem('proto-annot-v3-txnpwd-4',
       JSON.stringify({title:ti?ti.value:'',annotations:annotData}));
   }catch(e){}
 }
 function load(){
   if(viewLocked)return;
   try{
-    var s=localStorage.getItem('proto-annot-v3-txnpwd-3');if(!s)return;
+    var s=localStorage.getItem('proto-annot-v3-txnpwd-4');if(!s)return;
     var p=JSON.parse(s);
     if(p&&p.annotations&&Array.isArray(p.annotations)&&p.annotations.length)annotData=p.annotations;
     else if(Array.isArray(p)&&p.length)annotData=p;
